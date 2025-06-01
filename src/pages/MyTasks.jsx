@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import TaskOffersModal from '../components/TaskOffersModal';
+import RatingModal from '../components/RatingModal';
 
 const MyTasks = () => {
   const [activeTab, setActiveTab] = useState('posted');
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showOffersPopup, setShowOffersPopup] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const { user } = useSelector(state => state.auth);
 
@@ -65,6 +67,22 @@ const MyTasks = () => {
   const closeOffersPopup = () => {
     setShowOffersPopup(false);
     setSelectedTask(null);
+  };
+
+  const openRatingModal = (task) => {
+    setSelectedTask(task);
+    setShowRatingModal(true);
+  };
+
+  const closeRatingModal = () => {
+    setShowRatingModal(false);
+    setSelectedTask(null);
+  };
+
+  const handleRatingSubmit = (ratingData) => {
+    console.log('Rating submitted:', ratingData);
+    // Here you would typically send this data to your API
+    // For now, just log it to console
   };
 
   // if (!user) {
@@ -201,8 +219,14 @@ const MyTasks = () => {
                       </div>
                       <div>
                         <p className="text-gray-600 mb-2">Thực hiện bởi: {task.tasker}</p>
-                        <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 text-sm">
+                        <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 text-sm mr-2">
                           Xem chi tiết
+                        </button>
+                        <button 
+                          className="bg-blue-500 text-gray-50 px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
+                          onClick={() => openRatingModal(task)}
+                        >
+                          Đánh giá
                         </button>
                       </div>
                     </div>
@@ -228,6 +252,16 @@ const MyTasks = () => {
         <TaskOffersModal
           task={selectedTask} 
           onClose={closeOffersPopup} 
+        />
+      )}
+
+      {/* Rating Modal */}
+      {showRatingModal && selectedTask && (
+        <RatingModal
+          isOpen={showRatingModal}
+          onClose={closeRatingModal}
+          task={selectedTask}
+          onSubmit={handleRatingSubmit}
         />
       )}
     </div>

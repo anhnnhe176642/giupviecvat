@@ -16,7 +16,7 @@ function MainLayout() {
       <nav className="bg-white shadow-sm py-4">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-blue-600">TaskerAir</Link>
+            <Link to="/" className="text-2xl font-bold text-blue-600">GiupViecVat</Link>
             <div className="hidden md:flex ml-10 space-x-6">
               <Link to="/" className="text-gray-600 hover:text-blue-600">Danh mục</Link>
               <Link to="/browse-tasks" className="text-gray-600 hover:text-blue-600">Tìm công việc</Link>
@@ -47,7 +47,7 @@ function MainLayout() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h4 className="text-xl font-bold mb-4">TaskerAir</h4>
+              <h4 className="text-xl font-bold mb-4">GiupViecVat</h4>
               <p className="text-gray-300">Giải pháp quản lý công việc của bạn trên đám mây.</p>
             </div>
             <div>
@@ -79,7 +79,7 @@ function MainLayout() {
             </div>
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between">
-            <p className="text-gray-300">© 2025 TaskerAir. Chưa đăng ký bản quyền.</p>
+            <p className="text-gray-300">© 2025 GiupViecVat. Chưa đăng ký bản quyền.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-gray-300 hover:text-white">Điều khoản</a>
               <a href="#" className="text-gray-300 hover:text-white">Quyền riêng tư</a>

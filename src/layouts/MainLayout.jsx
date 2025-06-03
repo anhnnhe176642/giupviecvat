@@ -16,7 +16,13 @@ function MainLayout() {
       <nav className="bg-white shadow-sm py-4">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-blue-600">GiupViecVat</Link>
+            <Link to="/" className="text-2xl font-bold text-blue-600">
+              <img
+                src="./giupviecvatlogo.png"
+                className="h-10 w-auto" 
+                alt="Giupviecvat"
+              />
+            </Link>
             <div className="hidden md:flex ml-10 space-x-6">
               <Link to="/" className="text-gray-600 hover:text-blue-600">Danh mục</Link>
               <Link to="/browse-tasks" className="text-gray-600 hover:text-blue-600">Tìm công việc</Link>

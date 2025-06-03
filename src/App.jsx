@@ -20,8 +20,8 @@ function App() {
           <Route path="/browse-tasks" element={<BrowseTasks />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/my-tasks" element={<MyTasks />} />
-          <Route path="/chat" element={<ChatPage />} />
         </Route>
+        <Route path="/chat" element={<ChatPage />} />
         <Route path="/login" element={<Login />} />
       </Routes>
     </Provider>

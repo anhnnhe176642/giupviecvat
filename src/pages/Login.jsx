@@ -1,50 +1,31 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { GoogleLogin } from '@react-oauth/google';
-import { loginStart, loginSuccess, loginFailure } from '../store/slices/authSlice';
-import api from '../api/axios';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import { useContext } from "react";
+import { AuthContext } from "../conext/AuthConext";
+import toast from "react-hot-toast";
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
+  const { login, googleLogin } = useContext(AuthContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    try {
-      dispatch(loginStart());
-      
-      // Example API call, replace with your actual endpoint
-      const response = await api.post('/auth/login', { email, password });
-      
-      dispatch(loginSuccess(response.data));
-      navigate('/dashboard');
-    } catch (error) {
-      dispatch(loginFailure(error.response?.data?.message || 'Login failed'));
-    }
+    login({ email, password }).then(() => {
+      navigate("/dashboard");
+    });
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    try {
-      dispatch(loginStart());
-      
-      // Send the ID token to your backend
-      const response = await api.post('/auth/google-login', {
-        token: credentialResponse.credential
-      });
-      
-      dispatch(loginSuccess(response.data));
-      navigate('/dashboard');
-    } catch (error) {
-      dispatch(loginFailure(error.response?.data?.message || 'Google login failed'));
-    }
+    googleLogin(credentialResponse).then(() => {
+      navigate("/");
+    });
   };
 
   const handleGoogleError = () => {
-    dispatch(loginFailure('Google login failed'));
+    toast.error("Đăng nhập bằng Google không thành công. Vui lòng thử lại.");
+    console.error("Google login failed");
   };
 
   return (
@@ -52,12 +33,10 @@ function Login() {
       <div className="max-w-screen-xl max-h-full m-0 sm:m-5 bg-white shadow sm:rounded-lg flex justify-center flex-1">
         <div className="lg:w-1/2 xl:w-5/12 p-4 sm:p-6 overflow-y-auto">
           <div className="flex justify-center">
-            <a 
-              href="/"
-              className="w-32 mx-auto">
+            <a href="/" className="w-32 mx-auto">
               <p className="text-2xl font-bold text-center text-blue-600">
                 <img
-                  src="./public/giupviecvatlogo.png"
+                  src="/giupviecvatlogo.png"
                   className="h-25 w-auto mx-auto"
                   alt="Giupviecvat"
                 />
@@ -102,7 +81,7 @@ function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                <button 
+                <button
                   type="submit"
                   className="cursor-pointer mt-4 tracking-wide font-semibold bg-indigo-500 text-gray-100 w-full py-3 rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
                 >
@@ -122,7 +101,10 @@ function Login() {
                 </button>
                 <p className="mt-4 text-xs text-gray-600 text-center">
                   Bạn chưa có tài khoản?{" "}
-                  <a href="#" className="border-b border-gray-500 border-dotted">
+                  <a
+                    href="#"
+                    className="border-b border-gray-500 border-dotted"
+                  >
                     Đăng ký
                   </a>
                 </p>
@@ -135,7 +117,7 @@ function Login() {
             className="m-6 xl:m-12 w-full bg-contain bg-center bg-no-repeat"
             style={{
               backgroundImage:
-                'url("https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg")'
+                'url("https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg")',
             }}
           ></div>
         </div>

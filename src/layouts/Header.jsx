@@ -1,13 +1,12 @@
+import { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../store/slices/authSlice';
+import { AuthContext } from '../conext/AuthConext';
 
 function Header() {
-  const { user } = useSelector(state => state.auth);
-  const dispatch = useDispatch();
-
+  const { user, logout } = useContext(AuthContext);
+  console.log("User in Header:", user);
   const handleLogout = () => {
-    dispatch(logout());
+    logout()
   };
 
   return (

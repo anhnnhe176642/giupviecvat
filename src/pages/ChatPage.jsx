@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Menu, ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import JobDetailModal from "../components/JobDetailModal";
+import toast from "react-hot-toast"; // Add this import
+import axios from "axios";
 
 // Import chat components
 import Message from "../components/chat/Message";
@@ -25,32 +27,31 @@ const ChatPage = () => {
     unseenMessages,
     setUnseenMessages,
     messages,
+    setMessages,
     loadMoreMessages,
     hasMore,
     isLoadingMore,
     sendMessage,
   } = useContext(ChatContext);
 
-  const { onlineUsers, user } = useContext(AuthContext);
+  const { onlineUsers, user, socket } = useContext(AuthContext);
   const messagesContainerRef = useRef(null);
   const scrollEnd = useRef();
   const [message, setMessage] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
-  const [jobDetails, setJobDetails] = useState({
-    title: "Làm sạch và sắp xếp căn hộ",
-    price: "300k",
-    time: "2 giờ",
-    date: "23/05/2025",
-    timeSlot: "8:00 - 10:00",
-    location: "42 Nguyễn Huệ, Quận 1, TP. HCM",
-    description:
-      "Công việc bao gồm dọn dẹp căn hộ 2 phòng ngủ, lau sàn, dọn bếp và sắp xếp đồ đạc gọn gàng. Cần hoàn thành trong buổi sáng để chuẩn bị cho sự kiện vào buổi chiều.",
-    skills: ["Cẩn thận", "Tỉ mỉ", "Đúng hẹn"],
-    clientName: "Nguyễn Thị B",
-    clientImage: "https://randomuser.me/api/portraits/women/21.jpg",
-  });
+  const [msg, setMsg] = useState({});
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [showJobForm, setShowJobForm] = useState(false);
+  const [tempJobDetails, setTempJobDetails] = useState({
+    title: "",
+    price: "",
+    time: "",
+    date: "",
+    timeSlot: "",
+    location: "",
+    description: "",
+  });
 
   useEffect(() => {
     getConversations();
@@ -86,6 +87,106 @@ const ChatPage = () => {
       setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  // Function to send job details as a message
+  const handleSendJobDetails = async (jobToSend = null) => {
+    if (!currentConversation || !jobToSend) return;
+
+    try {
+      setSendingMessage(true);
+
+      // Use the job details passed or the current job details state
+      const jobToShare = jobToSend || msg.jobDetails;
+
+      // Generate a descriptive message about the job
+      const jobMessage = `📋 Công việc: ${jobToShare.title}`;
+
+      await sendMessage(
+        currentConversation._id,
+        jobMessage,
+        null, // No image
+        jobToShare // Pass job details
+      );
+    } catch (error) {
+      console.error("Error sending job details:", error);
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  // Function to toggle job form
+  const toggleJobForm = () => {
+    setShowJobForm(!showJobForm);
+    // Pre-fill with existing job details as template if showing form
+    if (!showJobForm) {
+      setTempJobDetails({
+        title: "",
+        price: "",
+        time: "",
+        date: new Date().toISOString().split("T")[0], // Today's date
+        timeSlot: "",
+        location: "",
+        description: "",
+      });
+    }
+  };
+
+  // Function to handle job form submission
+  const handleJobFormSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!currentConversation) {
+      toast.error("Please select a conversation first");
+      return;
+    }
+
+    if (!tempJobDetails.title) {
+      toast.error("Job title is required");
+      return;
+    }
+
+    try {
+      setSendingMessage(true);
+
+      // Create job object with required fields
+      const jobToSend = {
+        ...tempJobDetails,
+        // Add any required fields that might be missing
+        skills: tempJobDetails.skills || ["Không yêu cầu"],
+        clientName: user?.name || "Unknown",
+        clientImage: user?.avatar || "https://randomuser.me/api/portraits/lego/1.jpg",
+      };
+
+      await sendMessage(
+        currentConversation._id,
+        null, // No text message
+        null, // No image
+        jobToSend // Pass job details
+      );
+
+      // Reset form and hide it
+      setShowJobForm(false);
+      setTempJobDetails({
+        title: "",
+        price: "",
+        time: "",
+        date: "",
+        timeSlot: "",
+        location: "",
+        description: "",
+      });
+      
+      // Trigger scroll to bottom after sending job
+      setTimeout(() => {
+        scrollEnd.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } catch (error) {
+      console.error("Error sending job details:", error);
+      toast.error("Failed to send job details");
     } finally {
       setSendingMessage(false);
     }
@@ -153,16 +254,82 @@ const ChatPage = () => {
     }
   }, [messages, isInitialLoad]);
 
-  const handleAcceptJob = () => {
-    console.log("Job accepted");
-    setIsJobModalOpen(false);
-    // Here you would add logic to handle job acceptance
+  // Add a function to update job status
+  const updateJobStatus = async (jobId, status) => {
+    if (!jobId) return;
+    
+    try {
+      const response = await axios.put(`/jobs/${jobId}/status`, { status });
+      
+      if (response.data.success) {
+        // Update job status in the UI
+        setMessages(prevMessages => 
+          prevMessages.map(message => {
+            if (message.messageType === 'job' && message.jobDetails && message.jobDetails._id === jobId) {
+              return {
+                ...message,
+                jobDetails: {
+                  ...message.jobDetails,
+                  status: status
+                }
+              };
+            }
+            return message;
+          })
+        );
+        
+        // Also update the job details modal if it's currently showing this job
+        if (isJobModalOpen && msg.jobDetails && msg.jobDetails._id === jobId) {
+          setMsg(prev => ({
+            ...prev,
+            jobDetails: {
+              ...prev.jobDetails,
+              status: status
+            }
+          }));
+        }
+        
+        // Notify the client using socket that we updated the job status
+        // This is for debugging purposes, actual updates are sent from server
+        if (socket) {
+          socket.emit("jobStatusUpdateClient", {
+            jobId,
+            status,
+            conversationId: currentConversation?._id
+          });
+        }
+        
+        toast.success(
+          status === 'accepted' 
+            ? 'Bạn đã chấp nhận công việc này!' 
+            : status === 'rejected'
+              ? 'Bạn đã từ chối công việc này!'
+              : 'Trạng thái công việc đã được cập nhật!'
+        );
+      } else {
+        toast.error("Không thể cập nhật trạng thái công việc");
+      }
+    } catch (error) {
+      console.error("Error updating job status:", error);
+      toast.error("Đã xảy ra lỗi khi cập nhật trạng thái");
+    }
   };
 
-  const handleDeclineJob = () => {
-    console.log("Job declined");
+  const handleAcceptJob = (jobId) => {
+    updateJobStatus(jobId, 'accepted');
     setIsJobModalOpen(false);
-    // Here you would add logic to handle job rejection
+  };
+
+  const handleDeclineJob = (jobId) => {
+    updateJobStatus(jobId, 'rejected');
+    setIsJobModalOpen(false);
+  };
+
+  // Add a function to cancel a job
+  const handleCancelJob = (jobId) => {
+    updateJobStatus(jobId, 'cancelled');
+    setIsJobModalOpen(false);
+    toast.success('Công việc đã được huỷ!');
   };
 
   // Function to format time
@@ -342,23 +509,31 @@ const ChatPage = () => {
                                   : "col-start-1 col-end-9"
                               } break-words`}
                             >
-                              <Message
-                                content={msg.text}
-                                timestamp={formatMessageTime(msg.createdAt)}
-                                sender={msg.sender.name}
-                                isOutgoing={msg.sender._id === user._id}
-                                image={msg.image}
-                              />
+                              {msg.messageType === 'job' ? (
+                                <JobAssignmentMessage
+                                  job={msg.jobDetails}
+                                  onViewDetails={() => {
+                                    setMsg(msg);
+                                    setIsJobModalOpen(true);
+                                  }}
+                                  timestamp={formatMessageTime(msg.createdAt)}
+                                  sender={msg.sender.name}
+                                  isOutgoing={msg.sender._id === user._id}
+                                  onAccept={() => handleAcceptJob(msg.jobDetails._id)}
+                                  onDecline={() => handleDeclineJob(msg.jobDetails._id)}
+                                  onCancel={() => handleCancelJob(msg.jobDetails._id)}
+                                />
+                              ) : (
+                                <Message
+                                  content={msg.text}
+                                  timestamp={formatMessageTime(msg.createdAt)}
+                                  sender={msg.sender.name}
+                                  isOutgoing={msg.sender._id === user._id}
+                                  image={msg.image}
+                                />
+                              )}
                             </div>
                           ))}
-
-                          {/* Job Assignment Message */}
-                          <JobAssignmentMessage
-                            job={jobDetails}
-                            onViewDetails={() => setIsJobModalOpen(true)}
-                            timestamp="10:25 AM"
-                            sender="B"
-                          />
 
                           {/* Debug indicator - can be removed later */}
                           <div className="col-span-12 text-center text-xs text-gray-400 py-1">
@@ -371,12 +546,153 @@ const ChatPage = () => {
                       </div>
                     </div>
 
+                    {/* Add job form */}
+                    {showJobForm && (
+                      <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="font-medium text-lg text-gray-800">Tạo thông tin công việc</h3>
+                          <button 
+                            onClick={() => setShowJobForm(false)}
+                            className="text-gray-400 hover:text-gray-600"
+                            aria-label="Close form"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
+                        
+                        <form onSubmit={handleJobFormSubmit}>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Tiêu đề công việc *</label>
+                              <input
+                                type="text"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                value={tempJobDetails.title}
+                                onChange={(e) => setTempJobDetails({...tempJobDetails, title: e.target.value})}
+                                placeholder="Nhập tiêu đề công việc"
+                                required
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Giá tiền</label>
+                              <input
+                                type="text"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                value={tempJobDetails.price}
+                                onChange={(e) => setTempJobDetails({...tempJobDetails, price: e.target.value})}
+                                placeholder="VD: 300k"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Thời gian làm việc</label>
+                              <input
+                                type="text"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                value={tempJobDetails.time}
+                                onChange={(e) => setTempJobDetails({...tempJobDetails, time: e.target.value})}
+                                placeholder="VD: 2 giờ"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Ngày</label>
+                              <input
+                                type="date"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                value={tempJobDetails.date}
+                                onChange={(e) => setTempJobDetails({...tempJobDetails, date: e.target.value})}
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Khung giờ</label>
+                              <input
+                                type="text"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                value={tempJobDetails.timeSlot}
+                                onChange={(e) => setTempJobDetails({...tempJobDetails, timeSlot: e.target.value})}
+                                placeholder="VD: 8:00 - 10:00"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Kỹ năng yêu cầu</label>
+                              <input
+                                type="text"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                placeholder="VD: Cẩn thận, Tỉ mỉ (phân cách bằng dấu phẩy)"
+                                onChange={(e) => {
+                                  const skillsArray = e.target.value.split(',').map(skill => skill.trim()).filter(skill => skill);
+                                  setTempJobDetails({...tempJobDetails, skills: skillsArray});
+                                }}
+                              />
+                            </div>
+                            
+                            <div className="md:col-span-2">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Địa điểm</label>
+                              <input
+                                type="text"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                value={tempJobDetails.location}
+                                onChange={(e) => setTempJobDetails({...tempJobDetails, location: e.target.value})}
+                                placeholder="Nhập địa chỉ công việc"
+                              />
+                            </div>
+                            
+                            <div className="md:col-span-2">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Mô tả chi tiết</label>
+                              <textarea
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                rows="3"
+                                value={tempJobDetails.description}
+                                onChange={(e) => setTempJobDetails({...tempJobDetails, description: e.target.value})}
+                                placeholder="Mô tả chi tiết công việc"
+                              ></textarea>
+                            </div>
+                          </div>
+                          
+                          <div className="flex justify-end space-x-2 mt-4">
+                            <button
+                              type="button"
+                              onClick={() => setShowJobForm(false)}
+                              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                            >
+                              Hủy
+                            </button>
+                            <button
+                              type="submit"
+                              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                              disabled={sendingMessage}
+                            >
+                              {sendingMessage ? (
+                                <>
+                                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                  Đang gửi...
+                                </>
+                              ) : (
+                                'Gửi công việc'
+                              )}
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    )}
+
                     {/* Message input */}
                     <ChatInput
                       message={message}
                       setMessage={setMessage}
                       onSendMessage={handleSendMessage}
                       isLoading={sendingMessage}
+                      onToggleJobForm={toggleJobForm}
+                      showJobForm={showJobForm}
                     />
                   </div>
                 </>
@@ -398,9 +714,11 @@ const ChatPage = () => {
           <JobDetailModal
             isOpen={isJobModalOpen}
             onClose={() => setIsJobModalOpen(false)}
-            job={jobDetails}
-            onAccept={handleAcceptJob}
-            onDecline={handleDeclineJob}
+            job={msg.jobDetails}
+            onAccept={() => msg.jobDetails && handleAcceptJob(msg.jobDetails._id)}
+            onDecline={() => msg.jobDetails && handleDeclineJob(msg.jobDetails._id)}
+            onCancel={() => msg.jobDetails && handleCancelJob(msg.jobDetails._id)}
+            isSender={msg?.sender?._id === user?._id}
           />
         </div>
       </div>

@@ -1,9 +1,17 @@
 import React, { useState, useRef } from "react";
-import { Paperclip, Image, X, Send } from "lucide-react";
+import { Paperclip, Send, Calendar, Image, X } from "lucide-react";
 
-const ChatInput = ({ message, setMessage, onSendMessage, isLoading }) => {
+const ChatInput = ({
+  message,
+  setMessage,
+  onSendMessage,
+  isLoading,
+  onToggleJobForm,
+  showJobForm,
+}) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef();
 
   const handleFileChange = (e) => {
@@ -94,6 +102,20 @@ const ChatInput = ({ message, setMessage, onSendMessage, isLoading }) => {
 
       {/* Input area */}
       <div className="flex items-center px-3">
+        {/* Job button */}
+        <button
+          type="button"
+          onClick={onToggleJobForm}
+          className={`p-2 rounded-full ${
+            showJobForm
+              ? "bg-indigo-100 text-indigo-600"
+              : "hover:bg-gray-200"
+          } mr-1`}
+          title="Gửi công việc"
+        >
+          <Calendar size={20} />
+        </button>
+
         {/* File input (hidden) */}
         <input
           type="file"
@@ -107,9 +129,10 @@ const ChatInput = ({ message, setMessage, onSendMessage, isLoading }) => {
         <button
           type="button"
           onClick={() => fileInputRef.current.click()}
-          className="p-2 text-gray-500 rounded-full hover:text-gray-700 hover:bg-gray-100 focus:outline-none"
+          className="p-2 rounded-full hover:bg-gray-200"
+          disabled={isLoading || isUploading}
         >
-          <Image size={20} />
+          <Paperclip size={20} className="text-gray-600" />
         </button>
 
         {/* Text input */}
@@ -119,20 +142,24 @@ const ChatInput = ({ message, setMessage, onSendMessage, isLoading }) => {
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Nhập tin nhắn..."
           className="flex-grow px-4 py-2 bg-transparent focus:outline-none"
-          disabled={isLoading}
+          disabled={isLoading || isUploading}
         />
 
-        {/* Send button */}
+        {/* Send button - updated to enable when there's an image selected */}
         <button
           type="submit"
           className={`p-2 rounded-full ${
-            (message.trim() || imageFile) && !isLoading
-              ? "text-indigo-600 hover:bg-indigo-50"
-              : "text-gray-400"
-          }`}
-          disabled={(!message.trim() && !imageFile) || isLoading}
+            (!message.trim() && !imagePreview)
+              ? "bg-gray-400"
+              : "bg-indigo-600 hover:bg-indigo-700"
+          } text-white`}
+          disabled={(!message.trim() && !imagePreview) || isLoading}
         >
-          <Send size={20} />
+          {isLoading ? (
+            <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+          ) : (
+            <Send size={20} />
+          )}
         </button>
       </div>
     </form>

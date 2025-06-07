@@ -79,11 +79,12 @@ export const ChatProvider = ({ children }) => {
   };
 
   // Function to send a new message
-  const sendMessage = async (conversationId, text, image = null) => {
+  const sendMessage = async (conversationId, text, image = null, jobDetails = null) => {
     try {
       const response = await axios.post(`/messages/send/${conversationId}`, {
         text,
         image,
+        jobDetails, // Add job details to the request
       });
       if (response.data.success) {
         // Add new message to the end (newest at bottom)
@@ -101,12 +102,13 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Function to subscribe to new messages (regardless of current conversation)
+  // Function to subscribe to new messages and job status updates
   const subscribeToNewMessages = () => {
     if (!socket) return;
     
     // Remove any existing global message listeners
     socket.off("newMessage");
+    socket.off("jobStatusUpdate");
     
     // Add new listener for all messages
     socket.on("newMessage", (newMessageData) => {
@@ -144,15 +146,45 @@ export const ChatProvider = ({ children }) => {
         console.error("Error processing new message:", error);
       }
     });
-  };
 
-  // Replace subscribeToConversation with our new function
-  const subscribeToConversation = subscribeToNewMessages;
+    // Add listener for job status updates
+    socket.on("jobStatusUpdate", (data) => {
+      console.log("Received job status update:", data);
+      const { jobId, status, conversationId, message } = data;
+
+      // Show notification about the status change
+      toast.success(message || `Job status updated to ${status}`);
+
+      // Update job status in the messages array if we're in the same conversation
+      if (currentConversation && currentConversation._id === conversationId) {
+        setMessages(prevMessages => 
+          prevMessages.map(message => {
+            if (message.messageType === 'job' && 
+                message.jobDetails && 
+                message.jobDetails._id === jobId) {
+              return {
+                ...message,
+                jobDetails: {
+                  ...message.jobDetails,
+                  status: status
+                }
+              };
+            }
+            return message;
+          })
+        );
+      }
+
+      // Also refresh conversations to show any updates in conversation list
+      getConversations();
+    });
+  };
 
   // Function to unsubscribe from a conversation
   const unsubscribeFromConversation = () => {
     if (!socket) return;
     socket.off("newMessage");
+    socket.off("jobStatusUpdate");
   };
 
   // Function to mark all messages in a conversation as read
@@ -188,11 +220,15 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
+  // Replace subscribeToConversation with our new function
+  const subscribeToConversation = subscribeToNewMessages;
+
   useEffect(() => {
     if (socket) {
       subscribeToNewMessages();
       return () => {
         socket.off("newMessage");
+        socket.off("jobStatusUpdate");
       };
     }
   }, [socket, currentConversation]); // Add currentConversation as dependency

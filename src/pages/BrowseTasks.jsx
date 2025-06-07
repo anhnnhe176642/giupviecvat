@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   MapPin,
   Calendar,
@@ -17,8 +17,9 @@ import {
   Package,
   Cpu,
   MoreHorizontal,
+  Compass,
 } from "lucide-react";
-import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import TaskDetailModal from "../components/TaskDetailModal";
@@ -378,14 +379,101 @@ function BrowseTasks() {
   const [showFilters, setShowFilters] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  
+  // New state variables for location features
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationActive, setLocationActive] = useState(false);
+  const [searchRadius, setSearchRadius] = useState(5000); // Default 5km radius
+  const mapRef = useRef(null);
+  
+  // Function to calculate distance between two coordinates in kilometers - moved up before usage
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    const distance = R * c; // Distance in km
+    return distance;
+  };
 
-  // Filter tasks based on search term and category
+  // Helper function also moved up before usage
+  const deg2rad = (deg) => {
+    return deg * (Math.PI/180);
+  };
+  
+  // Filter tasks based on search term, category, and location radius if active
   const filteredTasks = tasks.filter(
-    (task) =>
-      (task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.location.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (selectedCategory === "Tất cả" || task.category === selectedCategory)
+    (task) => {
+      // Basic filtering by search term and category
+      const matchesSearch = 
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.location.toLowerCase().includes(searchTerm.toLowerCase());
+        
+      const matchesCategory = 
+        selectedCategory === "Tất cả" || task.category === selectedCategory;
+        
+      // Location based filtering
+      let withinRadius = true;
+      if (locationActive && userLocation) {
+        // Calculate distance between user location and task
+        const distance = calculateDistance(
+          userLocation.lat, 
+          userLocation.lng, 
+          task.lat, 
+          task.lng
+        );
+        withinRadius = distance <= searchRadius / 1000; // Convert meters to kilometers
+      }
+      
+      return matchesSearch && matchesCategory && withinRadius;
+    }
   );
+
+  // Function to get user's current location
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      setLocationActive(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+          
+          // Fly to user location on the map
+          if (mapRef.current) {
+            mapRef.current.flyTo([latitude, longitude], 13);
+          }
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          setLocationActive(false);
+          alert("Không thể lấy vị trí của bạn. Vui lòng kiểm tra quyền truy cập vị trí.");
+        }
+      );
+    } else {
+      alert("Trình duyệt của bạn không hỗ trợ định vị.");
+      setLocationActive(false);
+    }
+  };
+
+  // Toggle location tracking
+  const toggleLocation = () => {
+    if (locationActive) {
+      setLocationActive(false);
+    } else {
+      getUserLocation();
+    }
+  };
+
+  // Map reference component to access the map instance
+  const MapReference = () => {
+    const map = useMap();
+    mapRef.current = map;
+    return null;
+  };
 
   // Handle view task details
   const handleViewTaskDetails = (index) => {
@@ -516,22 +604,52 @@ function BrowseTasks() {
             zoom={5}
             className="w-full h-full z-0"
           >
+            <MapReference />
             <TileLayer
               attribution=" "
               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             />
-            {/* 5km radius circle around "Giúp quét và sắp xếp tài liệu" task */}
 
-            {/* <Circle
-              center={[21.0285, 105.8542]}
-              radius={5000}
-              pathOptions={{
-                color: "#16a34a", // green-600
-                fillColor: "#16a34a",
-                fillOpacity: 0.1,
-              }}
-            /> */}
+            {/* User location circle */}
+            {locationActive && userLocation && (
+              <Circle
+                center={[userLocation.lat, userLocation.lng]}
+                radius={searchRadius}
+                pathOptions={{
+                  color: "#16a34a", // green-600
+                  fillColor: "#16a34a",
+                  fillOpacity: 0.1,
+                }}
+              />
+            )}
 
+            {/* User location marker */}
+            {locationActive && userLocation && (
+              <Marker 
+                position={[userLocation.lat, userLocation.lng]}
+                icon={L.divIcon({
+                  className: "custom-marker-icon",
+                  html: `<div style="background-color: #3b82f6; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border: 3px solid white;">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="1"></circle>
+                          </svg>
+                        </div>`,
+                  iconSize: [30, 30],
+                  iconAnchor: [15, 15],
+                  popupAnchor: [0, -15],
+                })}
+              >
+                <Popup>
+                  <div className="text-center">
+                    <p className="font-medium">Vị trí của bạn</p>
+                    <p className="text-sm text-gray-500">Bán kính tìm kiếm: {searchRadius/1000} km</p>
+                  </div>
+                </Popup>
+              </Marker>
+            )}
+            
+            {/* Task markers */}
             {filteredTasks.map((task, idx) => (
               <Marker
                 key={idx}
@@ -577,8 +695,20 @@ function BrowseTasks() {
             ))}
           </MapContainer>
 
-          {/* Filter button and dropdown */}
-          <div className="absolute top-2 right-2 z-10">
+          {/* Filter and location buttons */}
+          <div className="absolute top-2 right-2 z-10 flex gap-2">
+            {/* Location button */}
+            <button
+              className={`${
+                locationActive ? "bg-green-600 text-white" : "bg-white text-gray-700"
+              } px-4 py-2 rounded-md shadow hover:bg-${locationActive ? "green-700" : "gray-100"} text-sm font-medium flex items-center transition-colors duration-200`}
+              onClick={toggleLocation}
+            >
+              <Compass className="w-4 h-4 mr-2" />
+              {locationActive ? "Đang định vị" : "Định vị"}
+            </button>
+
+            {/* Filter button */}
             <button
               className="bg-white px-4 py-2 rounded-md shadow hover:bg-gray-100 text-sm font-medium flex items-center"
               onClick={() => setShowFilters(!showFilters)}
@@ -588,8 +718,8 @@ function BrowseTasks() {
             </button>
 
             {showFilters && (
-              <div className="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg p-4">
-                {/* Category chips - moved from sidebar */}
+              <div className="absolute right-0 mt-12 w-72 bg-white rounded-md shadow-lg p-4">
+                {/* Category chips */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Danh mục công việc
@@ -620,27 +750,27 @@ function BrowseTasks() {
                   </div>
                 </div>
 
-                {/* <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Khoảng giá
-                </label>
-                <div className="flex items-center">
-                  <span className="mr-2">0k</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="200"
-                    step="10"
-                    className="flex-1 accent-green-600"
-                    defaultValue="200"
-                  />
-                  <span className="ml-2">200k+</span>
-                </div>
-              </div>
-              
-              <button className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                Áp dụng
-              </button> */}
+                {/* Radius slider - only show when location is active */}
+                {locationActive && (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Bán kính tìm kiếm: {searchRadius/1000} km
+                    </label>
+                    <div className="flex items-center">
+                      <span className="mr-2 text-xs">1km</span>
+                      <input
+                        type="range"
+                        min="1000"
+                        max="50000"
+                        step="1000"
+                        className="flex-1 accent-green-600"
+                        value={searchRadius}
+                        onChange={(e) => setSearchRadius(parseInt(e.target.value))}
+                      />
+                      <span className="ml-2 text-xs">50km</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

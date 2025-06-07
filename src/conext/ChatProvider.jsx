@@ -79,7 +79,7 @@ export const ChatProvider = ({ children }) => {
   };
 
   // Function to send a new message
-  const sendMessage = async (conversationId, text, image) => {
+  const sendMessage = async (conversationId, text, image = null) => {
     try {
       const response = await axios.post(`/messages/send/${conversationId}`, {
         text,

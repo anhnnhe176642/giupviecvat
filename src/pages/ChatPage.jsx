@@ -50,6 +50,7 @@ const ChatPage = () => {
     clientName: "Nguyễn Thị B",
     clientImage: "https://randomuser.me/api/portraits/women/21.jpg",
   });
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   useEffect(() => {
     getConversations();
@@ -59,7 +60,7 @@ const ChatPage = () => {
   useEffect(() => {
     // Initial fetch
     getConversations();
-    
+
     // Set up interval to refresh conversations list every 30 seconds
     const refreshInterval = setInterval(() => {
       if (!currentConversation) {
@@ -67,17 +68,27 @@ const ChatPage = () => {
         getConversations();
       }
     }, 30000);
-    
+
     return () => clearInterval(refreshInterval);
   }, []);
-  
+
   const navigate = useNavigate();
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e, imageData = null) => {
     e.preventDefault();
-    if (!message.trim()) return;
-    sendMessage(currentConversation._id, message);
-    setMessage("");
+
+    // Don't send if there's nothing to send
+    if (!message.trim() && !imageData) return;
+
+    try {
+      setSendingMessage(true);
+      await sendMessage(currentConversation._id, message, imageData);
+      setMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setSendingMessage(false);
+    }
   };
 
   // Function to handle scroll to load more messages
@@ -134,7 +145,7 @@ const ChatPage = () => {
         // For new messages, only scroll if user is already near the bottom
         const { scrollHeight, clientHeight, scrollTop } = messagesContainerRef.current;
         const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
-        
+
         if (isNearBottom) {
           scrollEnd.current.scrollIntoView({ behavior: "smooth" });
         }
@@ -156,21 +167,21 @@ const ChatPage = () => {
 
   // Function to format time
   const formatMessageTime = (timestamp) => {
-    if (!timestamp) return '';
+    if (!timestamp) return "";
     const date = new Date(timestamp);
     const now = new Date();
-    
+
     // If same day, show time only
     if (date.toDateString() === now.toDateString()) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } 
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
     // If this year, show month and day
     else if (date.getFullYear() === now.getFullYear()) {
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString([], { month: "short", day: "numeric" });
     }
     // Otherwise show year too
     else {
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: '2-digit' });
+      return date.toLocaleDateString([], { month: "short", day: "numeric", year: "2-digit" });
     }
   };
 
@@ -245,7 +256,7 @@ const ChatPage = () => {
                             </span>
                           )}
                         </div>
-                        
+
                         {conversation.lastMessagePreview && (
                           <div className="flex items-center">
                             <p className={`text-xs truncate max-w-[120px] ${unseenMessages[conversation._id] > 0 ? 'font-medium text-black' : 'text-gray-500'}`}>
@@ -255,7 +266,7 @@ const ChatPage = () => {
                           </div>
                         )}
                       </div>
-                      
+
                       {unseenMessages[conversation._id] > 0 && (
                         <div className="flex items-center justify-center ml-2 min-w-[20px] h-5 px-1.5 text-xs text-white bg-indigo-500 rounded-full leading-none">
                           {unseenMessages[conversation._id] > 99 ? '99+' : unseenMessages[conversation._id]}
@@ -336,6 +347,7 @@ const ChatPage = () => {
                                 timestamp={msg.createdAt}
                                 sender={msg.sender.name}
                                 isOutgoing={msg.sender._id === user._id}
+                                image={msg.image}
                               />
                             </div>
                           ))}
@@ -364,6 +376,7 @@ const ChatPage = () => {
                       message={message}
                       setMessage={setMessage}
                       onSendMessage={handleSendMessage}
+                      isLoading={sendingMessage}
                     />
                   </div>
                 </>

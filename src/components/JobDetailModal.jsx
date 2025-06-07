@@ -156,7 +156,7 @@ const JobDetailModal = ({ isOpen, onClose, job, onAccept, onDecline, onShare, on
             <span className="text-blue-600 text-xl font-bold">{job.price} VNĐ</span>
             <div className="flex gap-2">
               <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center">
-                <Clock size={12} className="mr-1" /> {job.time }
+                <Clock size={12} className="mr-1" /> {job.duration }
               </span>
               {renderStatusBadge()}
             </div>

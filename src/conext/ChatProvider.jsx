@@ -195,7 +195,7 @@ export const ChatProvider = ({ children }) => {
         socket.off("newMessage");
       };
     }
-  }, [socket]);
+  }, [socket, currentConversation]); // Add currentConversation as dependency
 
   useEffect(() => {
     if (currentConversation) {

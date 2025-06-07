@@ -23,10 +23,10 @@ function App() {
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/browse-tasks" element={<BrowseTasks />} />
           <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
           <Route path="/my-tasks" element={<MyTasks />} />
         </Route>
+          <Route path="/browse-tasks" element={<BrowseTasks />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
       </Routes>

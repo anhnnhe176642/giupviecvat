@@ -1,6 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import CreateTaskModal from '../components/CreateTaskModal';
 
 function Home() {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Handle create task
+  const handleCreateTask = (newTask) => {
+    // In a real app, this would send data to a backend API
+    console.log('New task created:', newTask);
+    // You would typically redirect to a success page or task list
+    alert('Công việc đã được tạo thành công!');
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -19,7 +32,10 @@ function Home() {
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                   />
                 </div>
-                <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
+                <button 
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium"
+                  onClick={() => setIsCreateModalOpen(true)}
+                >
                   Đăng việc
                 </button>
               </div>
@@ -113,11 +129,25 @@ function Home() {
           <h3 className="text-3xl font-bold mb-4">Sẵn sàng để bắt đầu?</h3>
           <p className="text-xl mb-8 max-w-2xl mx-auto">Tham gia cùng hàng nghìn người sử dụng GiupViecVat để hoàn thành nhiều việc hơn mỗi ngày</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button className="bg-white text-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-gray-100">Đăng việc</button>
-            <button className="border-2 border-white text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700">Trở thành người giúp việc</button>
+            <button 
+              className="bg-white text-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-gray-100"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              Đăng việc
+            </button>
+            <button className="border-2 border-white text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700">
+              Trở thành người giúp việc
+            </button>
           </div>
         </div>
       </div>
+      
+      {/* Create Task Modal */}
+      <CreateTaskModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreateTask={handleCreateTask}
+      />
     </div>
   );
 }

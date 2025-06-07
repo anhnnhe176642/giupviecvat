@@ -344,7 +344,7 @@ const ChatPage = () => {
                             >
                               <Message
                                 content={msg.text}
-                                timestamp={msg.createdAt}
+                                timestamp={formatMessageTime(msg.createdAt)}
                                 sender={msg.sender.name}
                                 isOutgoing={msg.sender._id === user._id}
                                 image={msg.image}

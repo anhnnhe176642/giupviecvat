@@ -1,5 +1,5 @@
-import React from 'react';
-import { Paperclip } from 'lucide-react';
+import React from "react";
+import { Paperclip } from "lucide-react";
 
 const ChatInput = ({ message, setMessage, onSendMessage }) => {
   return (
@@ -15,6 +15,11 @@ const ChatInput = ({ message, setMessage, onSendMessage }) => {
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                onSendMessage(e);
+              }
+            }}
             placeholder="Nhập tin nhắn..."
             className="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
           />
@@ -40,7 +45,11 @@ const ChatInput = ({ message, setMessage, onSendMessage }) => {
         <button
           onClick={onSendMessage}
           disabled={!message.trim()}
-          className={`flex items-center justify-center ${message.trim() ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-gray-200 text-gray-400'} rounded-xl text-white px-4 py-1 flex-shrink-0`}
+          className={`flex items-center justify-center ${
+            message.trim()
+              ? "bg-indigo-500 hover:bg-indigo-600"
+              : "bg-gray-200 text-gray-400"
+          } rounded-xl text-white px-4 py-1 flex-shrink-0`}
         >
           <span>Gửi</span>
           <span className="ml-2">

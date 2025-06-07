@@ -10,9 +10,30 @@ import DateSeparator from "../components/chat/DateSeparator";
 import JobAssignmentMessage from "../components/chat/JobAssignmentMessage";
 import ChatInput from "../components/chat/ChatInput";
 import Header from "../layouts/Header";
+import { useContext } from "react";
+import { ChatContext } from "../conext/ChatConext";
+import { AuthContext } from "../conext/AuthConext";
+import { useEffect } from "react";
+import { useRef } from "react";
 
 const ChatPage = () => {
-  const navigate = useNavigate();
+  const {
+    getConversations,
+    conversations,
+    currentConversation,
+    setCurrentConversation,
+    unseenMessages,
+    setUnseenMessages,
+    messages,
+    loadMoreMessages,
+    hasMore,
+    isLoadingMore,
+    sendMessage,
+  } = useContext(ChatContext);
+
+  const { onlineUsers, user } = useContext(AuthContext);
+  const messagesContainerRef = useRef(null);
+  const scrollEnd = useRef();
   const [message, setMessage] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
@@ -30,13 +51,80 @@ const ChatPage = () => {
     clientImage: "https://randomuser.me/api/portraits/women/21.jpg",
   });
 
+  useEffect(() => {
+    getConversations();
+  }, [onlineUsers]);
+
+  const navigate = useNavigate();
+
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!message.trim()) return;
-    // Here you would add message sending logic
-    console.log("Sending message:", message);
+    sendMessage(currentConversation._id, message);
     setMessage("");
   };
+
+  // Function to handle scroll to load more messages
+  const handleScroll = () => {
+    if (!messagesContainerRef.current) return;
+
+    // If user scrolled to near the top, load more messages
+    const { scrollTop } = messagesContainerRef.current;
+    if (scrollTop < 50 && hasMore && !isLoadingMore) {
+      loadMoreMessages();
+    }
+  };
+
+  // Keep scroll position when loading older messages
+  useEffect(() => {
+    if (isLoadingMore && messagesContainerRef.current) {
+      // Store current scroll height before new messages are added
+      const scrollHeight = messagesContainerRef.current.scrollHeight;
+
+      // After new messages are loaded and rendered, adjust the scroll position
+      return () => {
+        if (messagesContainerRef.current) {
+          const newScrollHeight = messagesContainerRef.current.scrollHeight;
+          messagesContainerRef.current.scrollTop = newScrollHeight - scrollHeight;
+        }
+      };
+    }
+  }, [isLoadingMore]);
+
+  // Add this state to track initial loading of conversation
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // Modify the useEffect that handles conversation changes
+  useEffect(() => {
+    if (currentConversation) {
+      // Mark this as an initial load when conversation changes
+      setIsInitialLoad(true);
+    }
+  }, [currentConversation]);
+
+  // Modify the scroll effect to properly handle initial loads
+  useEffect(() => {
+    // Only run this effect if we have messages and the scrollEnd ref exists
+    if (messages.length > 0 && scrollEnd.current) {
+      // If it's the initial load of the conversation OR user is adding a new message
+      // then we want to scroll to the bottom
+      if (isInitialLoad) {
+        // Use a short timeout to ensure DOM is fully rendered
+        setTimeout(() => {
+          scrollEnd.current.scrollIntoView({ behavior: "auto" });
+          setIsInitialLoad(false);
+        }, 100);
+      } else if (messagesContainerRef.current) {
+        // For new messages, only scroll if user is already near the bottom
+        const { scrollHeight, clientHeight, scrollTop } = messagesContainerRef.current;
+        const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+        
+        if (isNearBottom) {
+          scrollEnd.current.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    }
+  }, [messages, isInitialLoad]);
 
   const handleAcceptJob = () => {
     console.log("Job accepted");
@@ -49,44 +137,6 @@ const ChatPage = () => {
     setIsJobModalOpen(false);
     // Here you would add logic to handle job rejection
   };
-
-  // Sample messages data
-  const messages = [
-    {
-      sender: "A",
-      content:
-        "Chào bạn, tôi đã xem thông tin công việc của bạn và rất muốn nhận việc này.",
-      timestamp: "10:15 AM",
-      isOutgoing: true,
-    },
-    {
-      sender: "B",
-      content:
-        "Xin chào, rất vui khi bạn quan tâm. Bạn có kinh nghiệm về lĩnh vực này không?",
-      timestamp: "10:17 AM",
-      isOutgoing: false,
-    },
-    {
-      sender: "A",
-      content:
-        "Vâng, tôi đã làm trong lĩnh vực này được 3 năm và hoàn thành nhiều công việc tương tự.",
-      timestamp: "10:19 AM",
-      isOutgoing: true,
-    },
-    {
-      sender: "B",
-      content:
-        "Rất ấn tượng! Tôi nghĩ bạn phù hợp với công việc này. Khi nào bạn có thể bắt đầu?",
-      timestamp: "10:23 AM",
-      isOutgoing: false,
-    },
-    {
-      sender: "A",
-      content: "Tôi có thể làm việc từ 8 giờ sáng vào cuối tuần.",
-      timestamp: "10:24 AM",
-      isOutgoing: true,
-    },
-  ];
 
   return (
     <>
@@ -130,24 +180,28 @@ const ChatPage = () => {
                 </div>
 
                 <div className="flex flex-col space-y-1 mt-4 -mx-2 h-72 overflow-y-auto">
-                  {[1, 2, 3, 4, 5].map((i) => (
+                  {conversations?.map((conversation) => (
                     <button
-                      key={i}
+                      key={conversation._id}
                       className={`flex flex-row items-center hover:bg-gray-100 rounded-xl p-2 ${
-                        i === 1 ? "bg-gray-100" : ""
+                        conversation._id === currentConversation?._id ? "bg-gray-100" : ""
                       }`}
+                      onClick={() => {
+                        setCurrentConversation(conversation);
+                        console.log("Selected conversation:", conversation);
+                      }}
                     >
                       <div
                         className={`flex items-center justify-center h-8 w-8 ${
-                          i === 1 ? "bg-indigo-200" : "bg-gray-200"
+                          conversation._id === currentConversation?._id ? "bg-indigo-200" : "bg-gray-200"
                         } rounded-full`}
                       >
-                        {i % 2 ? "N" : "M"}
+                        {conversation.name?.charAt(0) || "?"}
                       </div>
-                      <div className="ml-2 text-sm font-semibold">{`Người dùng ${i}`}</div>
-                      {i === 2 && (
+                      <div className="ml-2 text-sm font-semibold">{conversation.name}</div>
+                      {unseenMessages[conversation._id]?.length > 0 && (
                         <div className="flex items-center justify-center ml-auto text-xs text-white bg-red-500 h-4 w-4 rounded leading-none">
-                          2
+                          {unseenMessages[conversation._id].length}
                         </div>
                       )}
                     </button>
@@ -178,54 +232,95 @@ const ChatPage = () => {
                   </div>
                 </div>
               </div>
+              {currentConversation ? (
+                <>
+                  <div className="flex flex-col flex-auto flex-shrink-0 rounded-2xl bg-gray-100 h-full max-h-full p-2 md:p-4 w-full">
+                    <div
+                      className="flex flex-col h-full overflow-y-auto overflow-x-hidden mb-2 md:mb-4"
+                      ref={messagesContainerRef}
+                      onScroll={handleScroll}
+                    >
+                      <div className="flex flex-col h-full w-full">
+                        <div className="grid grid-cols-12 gap-y-2 w-full">
+                          {/* Loading indicator */}
+                          {isLoadingMore && (
+                            <div className="col-span-12 flex justify-center py-2">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500"></div>
+                            </div>
+                          )}
 
-              <div className="flex flex-col flex-auto flex-shrink-0 rounded-2xl bg-gray-100 h-full max-h-full p-2 md:p-4 w-full">
-                <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden mb-2 md:mb-4">
-                  <div className="flex flex-col h-full w-full">
-                    <div className="grid grid-cols-12 gap-y-2 w-full">
-                      {/* Date Separator */}
-                      <DateSeparator date="Hôm nay" />
+                          {/* Load more button */}
+                          {hasMore && !isLoadingMore && (
+                            <div className="col-span-12 flex justify-center py-2">
+                              <button
+                                onClick={loadMoreMessages}
+                                className="text-xs text-indigo-600 hover:text-indigo-800"
+                              >
+                                Tải thêm tin nhắn cũ hơn
+                              </button>
+                            </div>
+                          )}
 
-                      {/* Job Description Card */}
-                      <SystemCard job={jobDetails} />
+                          {/* Date Separator - only show this after system card */}
+                          <DateSeparator date="Hôm nay" />
 
-                      {/* Chat Messages */}
-                      {messages.map((msg, index) => (
-                        <div
-                          key={index}
-                          className={`col-span-12 ${
-                            msg.isOutgoing
-                              ? "col-start-6"
-                              : "col-start-1 col-end-9"
-                          } break-words`}
-                        >
-                          <Message
-                            content={msg.content}
-                            timestamp={msg.timestamp}
-                            sender={msg.sender}
-                            isOutgoing={msg.isOutgoing}
+                          {/* Chat Messages */}
+                          {messages?.map((msg, index) => (
+                            <div
+                              key={msg._id || index}
+                              className={`col-span-12 ${
+                                msg.sender._id === user._id
+                                  ? "col-start-6"
+                                  : "col-start-1 col-end-9"
+                              } break-words`}
+                            >
+                              <Message
+                                content={msg.text}
+                                timestamp={msg.createdAt}
+                                sender={msg.sender.name}
+                                isOutgoing={msg.sender._id === user._id}
+                              />
+                            </div>
+                          ))}
+
+                          {/* Job Assignment Message */}
+                          <JobAssignmentMessage
+                            job={jobDetails}
+                            onViewDetails={() => setIsJobModalOpen(true)}
+                            timestamp="10:25 AM"
+                            sender="B"
                           />
-                        </div>
-                      ))}
 
-                      {/* Job Assignment Message */}
-                      <JobAssignmentMessage
-                        job={jobDetails}
-                        onViewDetails={() => setIsJobModalOpen(true)}
-                        timestamp="10:25 AM"
-                        sender="B"
-                      />
+                          {/* Debug indicator - can be removed later */}
+                          <div className="col-span-12 text-center text-xs text-gray-400 py-1">
+                            {isInitialLoad ? "Loading conversation..." : ""}
+                          </div>
+
+                          {/* Scroll to this element - make sure it's always at the end */}
+                          <div ref={scrollEnd} className="col-span-12 h-1" />
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Message input */}
+                    <ChatInput
+                      message={message}
+                      setMessage={setMessage}
+                      onSendMessage={handleSendMessage}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full bg-gray-50 rounded-2xl">
+                  <div className="text-gray-500 text-center p-8">
+                    <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    <h3 className="text-xl font-medium mb-1">Không có cuộc trò chuyện nào được chọn</h3>
+                    <p>Vui lòng chọn một cuộc trò chuyện từ danh sách bên trái để bắt đầu nhắn tin</p>
                   </div>
                 </div>
-
-                {/* Message input */}
-                <ChatInput
-                  message={message}
-                  setMessage={setMessage}
-                  onSendMessage={handleSendMessage}
-                />
-              </div>
+              )}
             </div>
           </div>
 

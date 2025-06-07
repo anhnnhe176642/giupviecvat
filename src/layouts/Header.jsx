@@ -4,7 +4,7 @@ import { AuthContext } from '../conext/AuthConext';
 
 function Header() {
   const { user, logout } = useContext(AuthContext);
-  console.log("User in Header:", user);
+  //console.log("User in Header:", user);
   const handleLogout = () => {
     logout()
   };

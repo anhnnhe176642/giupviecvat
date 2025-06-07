@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [user, setUser] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const [sotcket, setSocket] = useState(null);
+  const [socket, setSocket] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const checkAuth = async () => {
@@ -87,8 +87,8 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common["Authorization"] = "";
       setUser(null);
       setOnlineUsers([]);
-      if (sotcket) {
-        sotcket.disconnect();
+      if (socket) {
+        socket.disconnect();
         setSocket(null);
       }
       toast.success("Logout successful!");
@@ -114,15 +114,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const connectSocket = (userData) => {
-    if (!userData || sotcket?.connected) return;
-    const socket = io(backendUrl, {
+    if (!userData || socket?.connected) return;
+    const newSocket = io(backendUrl, {
       query: {
-        userId: userData.id,
+        userId: userData._id,
       },
     });
-    socket.connect();
-    setSocket(socket);
-    socket.on("getOnlineUsers", (userIds) => {
+    newSocket.connect();
+    setSocket(newSocket);
+    newSocket.on("getOnlineUsers", (userIds) => {
       setOnlineUsers(userIds);
     });
   };
@@ -140,7 +140,7 @@ export const AuthProvider = ({ children }) => {
     axios,
     user,
     onlineUsers,
-    sotcket,
+    socket,
     isLoading,
     login,
     googleLogin,

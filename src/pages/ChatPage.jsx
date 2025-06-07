@@ -55,6 +55,22 @@ const ChatPage = () => {
     getConversations();
   }, [onlineUsers]);
 
+  // Periodically refresh conversations to get updated unread counts
+  useEffect(() => {
+    // Initial fetch
+    getConversations();
+    
+    // Set up interval to refresh conversations list every 30 seconds
+    const refreshInterval = setInterval(() => {
+      if (!currentConversation) {
+        // Only auto-refresh when no conversation is selected to avoid interrupting users
+        getConversations();
+      }
+    }, 30000);
+    
+    return () => clearInterval(refreshInterval);
+  }, []);
+  
   const navigate = useNavigate();
 
   const handleSendMessage = (e) => {
@@ -138,6 +154,26 @@ const ChatPage = () => {
     // Here you would add logic to handle job rejection
   };
 
+  // Function to format time
+  const formatMessageTime = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    const now = new Date();
+    
+    // If same day, show time only
+    if (date.toDateString() === now.toDateString()) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } 
+    // If this year, show month and day
+    else if (date.getFullYear() === now.getFullYear()) {
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+    // Otherwise show year too
+    else {
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: '2-digit' });
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col h-screen overflow-hidden">
@@ -175,11 +211,12 @@ const ChatPage = () => {
                 <div className="flex flex-row items-center justify-between text-xs">
                   <span className="font-bold">Cuộc trò chuyện hoạt động</span>
                   <span className="flex items-center justify-center bg-gray-300 h-4 w-4 rounded-full">
-                    4
+                    {conversations?.length || 0}
                   </span>
                 </div>
 
                 <div className="flex flex-col space-y-1 mt-4 -mx-2 h-72 overflow-y-auto">
+                  {/* Fix the unread message count display */}
                   {conversations?.map((conversation) => (
                     <button
                       key={conversation._id}
@@ -188,7 +225,6 @@ const ChatPage = () => {
                       }`}
                       onClick={() => {
                         setCurrentConversation(conversation);
-                        console.log("Selected conversation:", conversation);
                       }}
                     >
                       <div
@@ -198,10 +234,31 @@ const ChatPage = () => {
                       >
                         {conversation.name?.charAt(0) || "?"}
                       </div>
-                      <div className="ml-2 text-sm font-semibold">{conversation.name}</div>
-                      {unseenMessages[conversation._id]?.length > 0 && (
-                        <div className="flex items-center justify-center ml-auto text-xs text-white bg-red-500 h-4 w-4 rounded leading-none">
-                          {unseenMessages[conversation._id].length}
+                      <div className="flex-1 ml-2">
+                        <div className="flex justify-between items-center">
+                          <span className={`text-sm font-semibold ${unseenMessages[conversation._id] > 0 ? 'font-bold text-black' : 'font-medium text-gray-700'}`}>
+                            {conversation.name}
+                          </span>
+                          {conversation.lastMessagePreview && (
+                            <span className="text-xs text-gray-500">
+                              {formatMessageTime(conversation.lastMessagePreview.time)}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {conversation.lastMessagePreview && (
+                          <div className="flex items-center">
+                            <p className={`text-xs truncate max-w-[120px] ${unseenMessages[conversation._id] > 0 ? 'font-medium text-black' : 'text-gray-500'}`}>
+                              {conversation.sender?._id === user?._id ? 'You: ' : ''}
+                              {conversation.lastMessagePreview.text}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {unseenMessages[conversation._id] > 0 && (
+                        <div className="flex items-center justify-center ml-2 min-w-[20px] h-5 px-1.5 text-xs text-white bg-indigo-500 rounded-full leading-none">
+                          {unseenMessages[conversation._id] > 99 ? '99+' : unseenMessages[conversation._id]}
                         </div>
                       )}
                     </button>

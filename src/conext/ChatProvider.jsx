@@ -101,52 +101,101 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Function to subscribe to a conversation
-  const subscribeToConversation = () => {
+  // Function to subscribe to new messages (regardless of current conversation)
+  const subscribeToNewMessages = () => {
     if (!socket) return;
     
-    // Remove any existing listeners to prevent duplicates
+    // Remove any existing global message listeners
     socket.off("newMessage");
     
-    // Add new listener
+    // Add new listener for all messages
     socket.on("newMessage", (newMessageData) => {
       console.log("Received new message:", newMessageData);
-
-      // Check if the message belongs to the current conversation
-      if (
-        currentConversation &&
-        newMessageData.conversation &&
-        newMessageData.conversation.toString() === currentConversation._id.toString()
-      ) {
-        // Mark as seen if we're in the conversation
-        newMessageData.seen = true;
-        setMessages(prevMessages => [...prevMessages, newMessageData]);
+      
+      try {
+        // Convert IDs to strings for reliable comparison
+        const msgConversationId = newMessageData.conversation?.toString();
+        const currentConvId = currentConversation?._id?.toString();
         
-        // Let server know we've seen it
-        axios.put(`/messages/mark-as-read/${newMessageData._id}`).catch(err => {
-          console.error("Error marking message as read:", err);
-        });
-      } else {
-        // Update unread count for other conversations
-        setUnseenMessages(prevUnseenMessages => {
-          const conversationId = newMessageData.conversation.toString();
-          return {
-            ...prevUnseenMessages,
-            [conversationId]: (prevUnseenMessages[conversationId] || 0) + 1
-          };
-        });
-        
-        // Update the conversations list to show the new message
-        getConversations();
+        // Check if message belongs to current conversation
+        if (currentConversation && msgConversationId === currentConvId) {
+          // Mark as seen if we're in the conversation
+          newMessageData.seen = true;
+          setMessages(prevMessages => [...prevMessages, newMessageData]);
+          
+          // Let server know we've seen it
+          axios.put(`/messages/mark-as-read/${newMessageData._id}`).catch(err => {
+            console.error("Error marking message as read:", err);
+          });
+        } else {
+          // Update unread count for other conversations
+          setUnseenMessages(prevUnseenMessages => {
+            const updatedCounts = {...prevUnseenMessages};
+            if (msgConversationId) {
+              updatedCounts[msgConversationId] = (updatedCounts[msgConversationId] || 0) + 1;
+            }
+            return updatedCounts;
+          });
+          
+          // Update the conversations list to show the new message
+          getConversations();
+        }
+      } catch (error) {
+        console.error("Error processing new message:", error);
       }
     });
   };
+
+  // Replace subscribeToConversation with our new function
+  const subscribeToConversation = subscribeToNewMessages;
 
   // Function to unsubscribe from a conversation
   const unsubscribeFromConversation = () => {
     if (!socket) return;
     socket.off("newMessage");
   };
+
+  // Function to mark all messages in a conversation as read
+  const markConversationAsRead = async (conversationId) => {
+    if (!conversationId) return;
+    
+    try {
+      await axios.put(`/conversations/${conversationId}/read`);
+      
+      // Update local state to show messages as read
+      setUnseenMessages(prev => ({
+        ...prev,
+        [conversationId]: 0
+      }));
+      
+      // Also update conversations list to reflect read status
+      const updatedConversations = conversations.map(conv => {
+        if (conv._id === conversationId && conv.lastMessagePreview) {
+          return {
+            ...conv,
+            lastMessagePreview: {
+              ...conv.lastMessagePreview,
+              seen: true
+            }
+          };
+        }
+        return conv;
+      });
+      
+      setConversations(updatedConversations);
+    } catch (error) {
+      console.error("Error marking conversation as read:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (socket) {
+      subscribeToNewMessages();
+      return () => {
+        socket.off("newMessage");
+      };
+    }
+  }, [socket]);
 
   useEffect(() => {
     if (currentConversation) {
@@ -157,22 +206,12 @@ export const ChatProvider = ({ children }) => {
       // Fetch messages for the new conversation
       getMessages(currentConversation._id, 1, false);
       
-      // Set up socket subscription
-      subscribeToConversation();
-
-      // Reset unread count for this conversation
+      // Mark this conversation as read when opened
       if (unseenMessages[currentConversation._id] > 0) {
-        setUnseenMessages(prev => ({
-          ...prev,
-          [currentConversation._id]: 0
-        }));
+        markConversationAsRead(currentConversation._id);
       }
     }
-
-    return () => {
-      unsubscribeFromConversation();
-    };
-  }, [currentConversation, socket]);
+  }, [currentConversation]);
 
   // Add these functions to the context value
   const chatContextValue = {
@@ -192,6 +231,7 @@ export const ChatProvider = ({ children }) => {
     loadMoreMessages,
     hasMore,
     isLoadingMore,
+    markConversationAsRead,
   };
 
   return (

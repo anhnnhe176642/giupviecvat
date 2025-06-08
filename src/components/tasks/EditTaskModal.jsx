@@ -14,10 +14,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
+// Format number as VND currency (with thousand separators)
+const formatVND = (val) => {
+  if (!val) return '';
+  const number = parseInt(val.replace(/\D/g, ''), 10) || 0;
+  return number.toLocaleString('vi-VN');
+};
+
 const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
   // Form state initialized with task data
   const [title, setTitle] = useState(task?.title || '');
   const [price, setPrice] = useState(task?.price || '');
+  const [formattedPrice, setFormattedPrice] = useState('');
   const [description, setDescription] = useState(task?.description || '');
   const [time, setTime] = useState(task?.time || 'Linh hoạt');
   const [skills, setSkills] = useState(task?.skills?.length ? [...task.skills] : ['']);
@@ -44,6 +52,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
       // Initialize form with task data
       setTitle(task?.title || '');
       setPrice(task?.price || '');
+      setFormattedPrice(formatVND(task?.price?.toString() || ''));
       setDescription(task?.description || '');
       setTime(task?.time || 'Linh hoạt');
       setSkills(task?.skills?.length ? [...task.skills] : ['']);
@@ -225,6 +234,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
   const resetForm = () => {
     setTitle('');
     setPrice('');
+    setFormattedPrice('');
     setDescription('');
     setTime('Linh hoạt');
     setSkills(['']);
@@ -234,6 +244,14 @@ const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
     setLocationError(null);
     setMapStyle('stadiaBright');
     setSelectedCategory('');
+  };
+
+  // Handle price input changes with formatting
+  const handlePriceChange = (e) => {
+    const rawValue = e.target.value;
+    const numericValue = rawValue.replace(/\D/g, '');
+    setPrice(numericValue);
+    setFormattedPrice(formatVND(numericValue));
   };
 
   if (!isOpen) return null;
@@ -290,10 +308,10 @@ const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
                 <div className="relative">
                   <input
                     id="price"
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="VD: 100000"
+                    type="text"
+                    value={formattedPrice}
+                    onChange={handlePriceChange}
+                    placeholder="VD: 100,000"
                     className={`w-full px-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm ${
                       formErrors.price ? 'border-red-500' : 'border-gray-200'
                     }`}

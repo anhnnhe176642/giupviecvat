@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Paperclip, Send, Calendar, Image, X } from "lucide-react";
 
 const ChatInput = ({
@@ -8,11 +8,44 @@ const ChatInput = ({
   isLoading,
   onToggleJobForm,
   showJobForm,
+  isShow
 }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef();
+  const textInputRef = useRef(null); // New ref for text input
+
+  // Auto focus the input when component mounts
+  useEffect(() => {
+    textInputRef.current?.focus();
+    adjustTextareaHeight();
+  }, []);
+
+  // Add this useEffect to focus the input when isLoading changes from true to false
+  useEffect(() => {
+    if (!isLoading && textInputRef.current) {
+      textInputRef.current.focus();
+    }
+  }, [isLoading]);
+  
+  // Auto-adjust height when message content changes
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [message]);
+  
+  // Function to adjust the textarea height based on content
+  const adjustTextareaHeight = () => {
+    const textarea = textInputRef.current;
+    if (!textarea) return;
+    
+    // Reset height to auto so scrollHeight measurement is accurate
+    textarea.style.height = 'auto';
+    
+    // Set the height based on content
+    const newHeight = Math.min(textarea.scrollHeight, 120);
+    textarea.style.height = `${newHeight}px`;
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -45,6 +78,26 @@ const ChatInput = ({
     fileInputRef.current.value = "";
   };
 
+  const handleKeyDown = (e) => {
+    // Add new line when Shift+Enter is pressed
+    if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault();
+      setMessage(prev => prev + '\n');
+      
+      // Wait for state update, then adjust height
+      setTimeout(adjustTextareaHeight, 0);
+    } 
+    // Submit the form when Enter (without Shift) is pressed
+    else if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+  
+  const handleChange = (e) => {
+    setMessage(e.target.value);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -57,12 +110,19 @@ const ChatInput = ({
     }
 
     // Call the parent handler with message text and image data
-    onSendMessage(e, imageData);
+    await onSendMessage(e, imageData);
 
     // Clear the image preview after sending
     if (imagePreview) {
       clearImagePreview();
     }
+    
+    // More reliable focus approach
+    setTimeout(() => {
+      if (textInputRef.current) {
+        textInputRef.current.focus();
+      }
+    }, 10);
   };
 
   // Function to convert file to base64
@@ -103,7 +163,7 @@ const ChatInput = ({
       {/* Input area */}
       <div className="flex items-center px-3">
         {/* Job button */}
-        <button
+        { isShow && (<button
           type="button"
           onClick={onToggleJobForm}
           className={`p-2 rounded-full ${
@@ -114,7 +174,7 @@ const ChatInput = ({
           title="Gửi công việc"
         >
           <Calendar size={20} />
-        </button>
+        </button>)}
 
         {/* File input (hidden) */}
         <input
@@ -135,14 +195,17 @@ const ChatInput = ({
           <Paperclip size={20} className="text-gray-600" />
         </button>
 
-        {/* Text input */}
-        <input
-          type="text"
+        {/* Replace textarea with auto-expanding version */}
+        <textarea
+          ref={textInputRef}
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
           placeholder="Nhập tin nhắn..."
-          className="flex-grow px-4 py-2 bg-transparent focus:outline-none"
+          className="flex-grow px-4 py-2 bg-transparent focus:outline-none resize-none overflow-y-auto"
           disabled={isLoading || isUploading}
+          rows={1}
+          style={{ minHeight: '40px', maxHeight: '120px' }}
         />
 
         {/* Send button - updated to enable when there's an image selected */}

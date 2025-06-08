@@ -237,7 +237,7 @@ const ChatPage = () => {
     if (!jobId) return;
     
     try {
-      const response = await axios.put(`/jobs/${jobId}/status`, { status, conversationId: currentConversation?._id, acceptBy: user?._id });
+      const response = await axios.put(`/jobs/${jobId}/status`, { status, postTaskId: currentConversation.postTask._id, acceptTo: user._id });
       
       if (response.data.success) {
         // Update job status in the UI
@@ -419,7 +419,9 @@ const ChatPage = () => {
                           conversation._id === currentConversation?._id ? "bg-indigo-200" : "bg-gray-200"
                         } rounded-full`}
                       >
-                        {conversation.name?.charAt(0) || "?"}
+                        {conversation.name?.charAt(0) || <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>}
                       </div>
                       <div className="flex-1 ml-2">
                         <div className="flex justify-between items-center">
@@ -584,7 +586,7 @@ const ChatPage = () => {
                       isLoading={sendingMessage}
                       onToggleJobForm={toggleJobForm}
                       showJobForm={showJobForm}
-                      isShow={ currentConversation.postTask.poster == user._id ? true : false }
+                      isShow={ currentConversation.postTask.poster == user._id ? currentConversation.postTask.status == 'open' ? true: false : false }
                     />
                   </div>
                 </>

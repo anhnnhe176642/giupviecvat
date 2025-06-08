@@ -383,7 +383,7 @@ const ChatPage = () => {
                       <span className="text-gray-800 font-medium">{currentConversation.postTask.title || "Không có tiêu đề"}</span>
                     </p>
                     <p className="flex items-center justify-between">
-                      <span className="font-semibold text-gray-600">Giá:</span> 
+                      <span className="font-semibold text-gray-600">Ngân sách:</span> 
                       <span className="text-gray-800 font-medium">{currentConversation.postTask.price ? `${currentConversation.postTask.price.toLocaleString()}đ` : "Chưa có giá"}</span>
                     </p>
                     <p className="flex items-center justify-between">

@@ -25,7 +25,7 @@ function BrowseTasks() {
   
   // Price filter
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(10000000);
+  const [maxPrice, setMaxPrice] = useState(5000000);
   
   // Sorting
   const [sortBy, setSortBy] = useState("newest"); // Options: newest, nearest, price_low, price_high
@@ -81,7 +81,7 @@ function BrowseTasks() {
           category: selectedCategory !== "all" ? selectedCategory : undefined,
           sort: sortBy,
           minPrice: minPrice > 0 ? minPrice : undefined,
-          maxPrice: maxPrice < 10000000 ? maxPrice : undefined
+          maxPrice: maxPrice < 5000000 ? maxPrice : undefined
         };
         
         // Add location parameters if location is active
@@ -128,7 +128,7 @@ function BrowseTasks() {
         category: selectedCategory !== "all" ? selectedCategory : undefined,
         sort: sortBy,
         minPrice: minPrice > 0 ? minPrice : undefined,
-        maxPrice: maxPrice < 10000000 ? maxPrice : undefined
+        maxPrice: maxPrice < 5000000 ? maxPrice : undefined
       };
       
       // Add location parameters if location is active
@@ -151,6 +151,11 @@ function BrowseTasks() {
       setIsLoadingMore(false);
     }
   };
+
+  // Handle contact click (e.g., to open chat)
+  const handleConactClick = (task) => {
+
+  }
   
   // Handle scroll to load more tasks
   const handleScroll = (e) => {
@@ -239,7 +244,7 @@ function BrowseTasks() {
           category: selectedCategory !== "all" ? selectedCategory : undefined,
           sort: sortBy,
           minPrice: minPrice > 0 ? minPrice : undefined,
-          maxPrice: maxPrice < 10000000 ? maxPrice : undefined
+          maxPrice: maxPrice < 5000000 ? maxPrice : undefined
         };
         
         if (locationActive && userLocation) {
@@ -438,6 +443,7 @@ function BrowseTasks() {
           task={selectedTask !== null ? filteredTasks[selectedTask] : null}
           onEditTask={handleEditTask}
           onDeleteTask={handleDeleteTask}
+          onContactClick={handleConactClick}
         />
 
         {/* Create Task Modal */}

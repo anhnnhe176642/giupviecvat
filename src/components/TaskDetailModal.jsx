@@ -30,7 +30,7 @@ const formatDate = (dateString) => {
   }).format(date);
 };
 
-const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask }) => {
+const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask, onContactClick }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [showEditModal, setShowEditModal] = useState(false);

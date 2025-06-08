@@ -207,7 +207,7 @@ function TaskFilters({
                   <Range
                     step={100000}
                     min={0}
-                    max={10000000}
+                    max={5000000}
                     values={[tempMinPrice, tempMaxPrice]}
                     onChange={(values) => {
                       setTempMinPrice(values[0]);
@@ -226,7 +226,7 @@ function TaskFilters({
                             values: [tempMinPrice, tempMaxPrice],
                             colors: ['#e5e7eb', '#10b981', '#e5e7eb'],
                             min: 0,
-                            max: 10000000,
+                            max: 5000000,
                           }),
                         }}
                       >
@@ -243,7 +243,7 @@ function TaskFilters({
                 </div>
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>0đ</span>
-                  <span>10M+ đ</span>
+                  <span>5M+ đ</span>
                 </div>
               </div>
             </div>

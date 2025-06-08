@@ -171,12 +171,6 @@ function BrowseTasks() {
   // Filter tasks based on search term and category (remove location filtering as it's now done on the backend)
   const filteredTasks = tasks;
 
-  // Get category name by ID
-  const getCategoryNameById = (categoryId) => {
-    const category = categories.find(cat => cat._id === categoryId);
-    return category ? category.name : "Khác";
-  };
-
   // Function to get user's current location
   const getUserLocation = () => {
     if (navigator.geolocation) {

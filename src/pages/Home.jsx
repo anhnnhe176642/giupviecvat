@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 import CreateTaskModal from '../components/CreateTaskModal';
 import { FaArrowRight, FaBroom, FaTools, FaBox, FaChair, FaHome, FaSeedling } from 'react-icons/fa';
 
@@ -9,11 +11,26 @@ function Home() {
   const navigate = useNavigate();
 
   // Handle create task
-  const handleCreateTask = (newTask) => {
-    // In a real app, this would send data to a backend API
-    console.log('New task created:', newTask);
-    // You would typically redirect to a success page or task list
-    alert('Công việc đã được tạo thành công!');
+  const handleCreateTask = async (newTask) => {
+    try {
+      // Send data to backend API
+      const response = await axios.post("/tasks", newTask);
+      
+      if (response.data.success) {
+        // Show success message
+        toast.success("Công việc đã được tạo thành công!");
+        
+        // Redirect to browse tasks page after successful creation
+        navigate('/browse-tasks');
+      } else {
+        // Show error message
+        toast.error(response.data.message || "Lỗi khi tạo công việc.");
+      }
+    } catch (error) {
+      console.error("Error creating task:", error);
+      toast.error("Đã xảy ra lỗi khi tạo công việc. Vui lòng thử lại sau.");
+    }
+    setIsCreateModalOpen(false);
   };
 
   // Auto-rotate testimonials

@@ -305,9 +305,6 @@ function BrowseTasks() {
         // Remove the task from the current tasks list
         setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
         
-        // Show success message
-        toast("Công việc đã được xóa thành công!");
-        
         // Close the modal
         setIsModalOpen(false);
       } else {

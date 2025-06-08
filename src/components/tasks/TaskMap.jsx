@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
 import { MapPin } from "lucide-react";
 
 // Map reference component to access the map instance
-export const MapReference = () => {
+export const MapReference = ({ mapRef }) => {
   const map = useMap();
+  
+  // Set the map instance to the ref when the component mounts
+  useEffect(() => {
+    if (mapRef) {
+      mapRef.current = map;
+    }
+  }, [map, mapRef]);
+  
   return null;
 };
 
@@ -31,7 +39,7 @@ const TaskMap = ({
       zoom={5}
       className="w-full h-full z-0"
     >
-      <MapReference ref={mapRef} />
+      <MapReference mapRef={mapRef} />
       <TileLayer
         attribution=" "
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"

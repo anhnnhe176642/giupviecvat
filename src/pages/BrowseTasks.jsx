@@ -209,8 +209,14 @@ function BrowseTasks() {
       setLocationActive(false);
       // Refresh tasks without location filtering
     } else {
-      getUserLocation();
-      // Location parameters will be added on next useEffect trigger
+      if (userLocation && mapRef.current) {
+        // If we already have the user location, just turn it on and zoom to it
+        setLocationActive(true);
+        mapRef.current.flyTo([userLocation.lat, userLocation.lng], 13);
+      } else {
+        // Otherwise get the location (which will also zoom to it)
+        getUserLocation();
+      }
     }
   };
 

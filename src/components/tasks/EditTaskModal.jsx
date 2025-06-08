@@ -3,7 +3,7 @@ import { X, Plus, Minus, Compass, Loader } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
-import LocationPicker from './map/LocationPicker';
+import LocationPicker from '../map/LocationPicker';
 import axios from 'axios';
 
 // Fix for default marker icon in Leaflet
@@ -14,15 +14,17 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
-const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
-  // Form state
-  const [title, setTitle] = useState('');
-  const [price, setPrice] = useState('');
-  const [description, setDescription] = useState('');
-  const [time, setTime] = useState('Linh hoạt');
-  const [skills, setSkills] = useState(['']);
-  const [markerPosition, setMarkerPosition] = useState([21.0285, 105.8544]); // Default to hanoi
-  const [address, setAddress] = useState('');
+const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
+  // Form state initialized with task data
+  const [title, setTitle] = useState(task?.title || '');
+  const [price, setPrice] = useState(task?.price || '');
+  const [description, setDescription] = useState(task?.description || '');
+  const [time, setTime] = useState(task?.time || 'Linh hoạt');
+  const [skills, setSkills] = useState(task?.skills?.length ? [...task.skills] : ['']);
+  const [markerPosition, setMarkerPosition] = useState(
+    task?.lat && task?.lng ? [task.lat, task.lng] : [21.0285, 105.8544]
+  );
+  const [address, setAddress] = useState(task?.location || '');
   const [formErrors, setFormErrors] = useState({});
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationError, setLocationError] = useState(null);
@@ -30,19 +32,31 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   
   // New state for categories
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(task?.category || '');
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [categoryError, setCategoryError] = useState(null);
 
-  // Reset form when modal closes
+  // Load task data when modal opens
   useEffect(() => {
     if (!isOpen) {
       resetForm();
     } else {
+      // Initialize form with task data
+      setTitle(task?.title || '');
+      setPrice(task?.price || '');
+      setDescription(task?.description || '');
+      setTime(task?.time || 'Linh hoạt');
+      setSkills(task?.skills?.length ? [...task.skills] : ['']);
+      setMarkerPosition(
+        task?.lat && task?.lng ? [task.lat, task.lng] : [21.0285, 105.8544]
+      );
+      setAddress(task?.location || '');
+      setSelectedCategory(task?.category || '');
+      
       // Fetch categories when modal opens
       fetchCategories();
     }
-  }, [isOpen]);
+  }, [isOpen, task]);
 
   // Fetch categories from API
   const fetchCategories = async () => {
@@ -55,11 +69,6 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
       if (response.data.success) {
         const filteredCategories = response.data.categories.filter(cat => cat._id !== "all");
         setCategories(filteredCategories);
-        
-        // Set first category as default if there are categories and none is selected
-        if (filteredCategories.length > 0 && !selectedCategory) {
-          setSelectedCategory(filteredCategories[0]._id);
-        }
       } else {
         setCategoryError("Failed to load categories");
       }
@@ -107,28 +116,22 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
 
   // Get current location using browser geolocation API
   const getCurrentLocation = () => {
-    // Reset any previous location errors
     setLocationError(null);
     
-    // Check if geolocation is supported
     if (!navigator.geolocation) {
       setLocationError("Trình duyệt của bạn không hỗ trợ định vị GPS.");
       return;
     }
 
-    // Show loading indicator
     setIsGettingLocation(true);
 
-    // Request current position
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        // Success handler
         const { latitude, longitude } = position.coords;
         setMarkerPosition([latitude, longitude]);
         setIsGettingLocation(false);
       },
       (error) => {
-        // Error handler
         setIsGettingLocation(false);
         switch (error.code) {
           case error.PERMISSION_DENIED:
@@ -187,7 +190,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   // Handle form submission
   const handleSubmit = () => {
     if (validateForm()) {
-      const newTask = {
+      const editedTask = {
         title,
         price: Number(price),
         description,
@@ -196,10 +199,10 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
         location: address,
         lat: markerPosition[0],
         lng: markerPosition[1],
-        category: selectedCategory, // Add category to task data
+        category: selectedCategory,
       };
       
-      onCreateTask(newTask);
+      onEditTask(editedTask);
     }
   };
 
@@ -224,12 +227,12 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
     setDescription('');
     setTime('Linh hoạt');
     setSkills(['']);
-    setMarkerPosition([21.0285, 105.8544]); // Default to FPT
+    setMarkerPosition([21.0285, 105.8544]);
     setAddress('');
     setFormErrors({});
     setLocationError(null);
     setMapStyle('stadiaBright');
-    setSelectedCategory(''); // Reset selected category
+    setSelectedCategory('');
   };
 
   if (!isOpen) return null;
@@ -246,7 +249,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
       >
         {/* Header */}
         <div className="flex justify-between items-center p-5 bg-gradient-to-r from-emerald-50 via-white to-green-50 shrink-0 border-b border-gray-100">
-          <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-green-700 bg-clip-text text-transparent">Tạo công việc mới</h2>
+          <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-green-700 bg-clip-text text-transparent">Chỉnh sửa công việc</h2>
           <button 
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 bg-white hover:bg-gray-50 rounded-full p-1.5 transition-all shadow-sm border border-gray-100 hover:border-gray-200"
@@ -299,7 +302,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
                 {formErrors.price && <p className="text-red-500 text-xs mt-1.5">{formErrors.price}</p>}
               </div>
               
-              {/* Category dropdown - new field */}
+              {/* Category dropdown */}
               <div>
                 <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Thể loại công việc <span className="text-red-500">*</span>
@@ -521,7 +524,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
             onClick={handleSubmit}
             className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-lg hover:from-emerald-700 hover:to-green-800 transition-all shadow-md font-medium"
           >
-            Tạo công việc
+            Lưu thay đổi
           </button>
         </div>
       </div>
@@ -546,4 +549,4 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   );
 };
 
-export default CreateTaskModal;
+export default EditTaskModal;

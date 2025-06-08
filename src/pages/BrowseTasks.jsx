@@ -8,6 +8,7 @@ import Header from "../layouts/Header";
 import TaskMap, { MapReference } from "../components/tasks/TaskMap";
 import TaskList from "../components/tasks/TaskList";
 import TaskFilters from "../components/tasks/TaskFilters";
+import toast from "react-hot-toast";
 import { createCategoryIcon, getCategoryColor, getCategoryIconElement, getCategoryName } from "../utils/categoryHelpers";
 
 function BrowseTasks() {
@@ -188,11 +189,11 @@ function BrowseTasks() {
         (error) => {
           console.error("Error getting location:", error);
           setLocationActive(false);
-          alert("Không thể lấy vị trí của bạn. Vui lòng kiểm tra quyền truy cập vị trí.");
+          toast("Không thể lấy vị trí của bạn. Vui lòng kiểm tra quyền truy cập vị trí.");
         }
       );
     } else {
-      alert("Trình duyệt của bạn không hỗ trợ định vị.");
+      toast("Trình duyệt của bạn không hỗ trợ định vị.");
       setLocationActive(false);
     }
   };
@@ -215,11 +216,52 @@ function BrowseTasks() {
   };
 
   // Handle create task
-  const handleCreateTask = (newTask) => {
-    // In a real app, this would send data to a backend API
-    console.log("New task created:", newTask);
-    // You would typically refresh the task list or add the new task to the state
-    alert("Công việc đã được tạo thành công!");
+  const handleCreateTask = async (newTask) => {
+    try {
+      // Show loading indicator or disable submit button (would be implemented in a real app)
+      
+      // Send data to backend API
+      const response = await axios.post("/tasks", newTask);
+      
+      if (response.data.success) {
+        // Add the new task to the current tasks list
+        setTasks(prevTasks => [response.data.task, ...prevTasks]);
+        
+        // Show success message
+        toast("Công việc đã được tạo thành công!");
+        
+        // Refresh tasks list to ensure we have the latest data
+        // This could be optimized to just add the new task to the state instead of refetching
+        const searchParams = {
+          page: 1,
+          limit: 10,
+          search: searchTerm,
+          category: selectedCategory !== "all" ? selectedCategory : undefined,
+          sort: sortBy,
+          minPrice: minPrice > 0 ? minPrice : undefined,
+          maxPrice: maxPrice < 10000000 ? maxPrice : undefined
+        };
+        
+        if (locationActive && userLocation) {
+          searchParams.lat = userLocation.lat;
+          searchParams.lng = userLocation.lng;
+          searchParams.radius = searchRadius;
+        }
+        
+        const refreshResponse = await axios.get("/tasks", { params: searchParams });
+        if (refreshResponse.data.success) {
+          setTasks(refreshResponse.data.tasks);
+          setPage(1);
+        }
+      } else {
+        // Show error message
+        toast("Lỗi: " + response.data.message);
+      }
+    } catch (error) {
+      console.error("Error creating task:", error);
+      toast("Đã xảy ra lỗi khi tạo công việc. Vui lòng thử lại sau.");
+    }
+    setIsCreateModalOpen(false);
   };
 
   // Helper function to get task poster name and image
@@ -230,24 +272,7 @@ function BrowseTasks() {
   const getPosterImage = (task) => {
     return task.poster && task.poster.profilePicture 
       ? task.poster.profilePicture 
-      : "https://randomuser.me/api/portraits/lego/1.jpg"; // Fallback image
-  };
-
-  // Helper function to format posted date
-  const getPostedDate = (task) => {
-    if (!task.createdAt) return "";
-    
-    const taskDate = new Date(task.createdAt);
-    const now = new Date();
-    const diffTime = Math.abs(now - taskDate);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-    
-    if (diffDays > 0) {
-      return `${diffDays} ngày trước`;
-    } else {
-      return `${diffHours} giờ trước`;
-    }
+      : "https://cdn-icons-png.flaticon.com/512/10337/10337609.png"; // Fallback image
   };
 
   return (

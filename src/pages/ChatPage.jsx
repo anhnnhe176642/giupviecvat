@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Menu, ChevronLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import JobDetailModal from "../components/JobDetailModal";
 import toast from "react-hot-toast"; // Add this import
 import axios from "axios";
@@ -61,20 +61,22 @@ const ChatPage = () => {
   useEffect(() => {
     // Initial fetch
     getConversations();
-
-    // Set up interval to refresh conversations list every 30 seconds
-    const refreshInterval = setInterval(() => {
-      if (!currentConversation) {
-        // Only auto-refresh when no conversation is selected to avoid interrupting users
-        getConversations();
-      }
-    }, 30000);
-
-    return () => clearInterval(refreshInterval);
   }, []);
 
   const navigate = useNavigate();
-
+  const params = useParams();
+  const conversationId = params.id;
+  
+  // Use useEffect to set the current conversation when the ID changes or conversations load
+  useEffect(() => {
+    if (conversationId && conversations.length > 0) {
+      const foundConversation = conversations.find(c => c._id === conversationId);
+      if (foundConversation) {
+        setCurrentConversation(foundConversation);
+      }
+    }
+  }, [conversationId, conversations, setCurrentConversation]);
+  
   const handleSendMessage = async (e, imageData = null) => {
     e.preventDefault();
 

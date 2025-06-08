@@ -6,6 +6,7 @@ import EditTaskModal from "./tasks/EditTaskModal";
 import toast from "react-hot-toast";
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
+import axios from "axios"; // Add axios import
 
 // Function to format currency
 const formatCurrency = (amount) => {
@@ -52,9 +53,24 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask, onCo
     };
   }, [isOpen]);
 
-  const handleContactClick = () => {
-    onClose(); // Close the modal first
-    navigate('/chat'); // Navigate to chat page
+  const handleContactClick = async () => {
+    try {
+      // Send POST request to create a conversation
+      const response = await axios.post(`/conversations/posttask/${task._id}`);
+      
+      // Check if response contains conversation ID
+      if (response.data && response.data.conversation._id) {
+        onClose(); // Close the modal first
+        // Navigate to the specific conversation
+        navigate(`/chat/conversation/${response.data.conversation._id}`);
+      } else {
+        throw new Error('Conversation ID not found in response');
+      }
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      toast.error("Không thể tạo cuộc trò chuyện. Vui lòng thử lại sau.");
+      onClose();
+    }
   };
   
   const handleEditClick = () => {

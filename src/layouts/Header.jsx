@@ -15,7 +15,7 @@ function Header() {
         <div className="flex items-center">
           <Link to="/" className="text-2xl font-bold text-blue-600">
             <img
-              src="./giupviecvatlogo.png"
+              src="/giupviecvatlogo.png"
               className="h-10 w-auto" 
               alt="Giupviecvat"
             />

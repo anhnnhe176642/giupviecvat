@@ -1,9 +1,38 @@
-import React from 'react';
-import { MapPin, Calendar } from "lucide-react";
+import { MapPin, Calendar, Clock } from "lucide-react";
 
 const TaskCard = ({ task, index, isSelected, onClick, onViewDetails, getPosterImage, getPosterName }) => {
   const formatVND = (amount) => {
     return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+  };
+  
+  const formatDate = (dateString) => {
+    if (!dateString) return "Chưa cập nhật";
+    
+    const now = new Date();
+    const createdDate = new Date(dateString);
+    const diffInMs = now - createdDate;
+    const diffInMinutes = Math.floor(diffInMs / 60000);
+    const diffInHours = Math.floor(diffInMs / 3600000);
+    const diffInDays = Math.floor(diffInMs / 86400000);
+    
+    if (diffInMinutes < 1) {
+      return "Vừa xong";
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes} phút trước`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours} giờ trước`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays} ngày trước`;
+    } else {
+      // For dates older than a week, show the actual date and time
+      return createdDate.toLocaleString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
   };
   
   return (
@@ -29,6 +58,9 @@ const TaskCard = ({ task, index, isSelected, onClick, onViewDetails, getPosterIm
       </div>
       <div className="flex items-center text-sm text-gray-600 mt-1.5">
         <Calendar className="w-4 h-4 mr-1.5 text-green-500" /> {task.time}
+      </div>
+      <div className="flex items-center text-sm text-gray-600 mt-1.5">
+        <Clock className="w-4 h-4 mr-1.5 text-green-500" /> {formatDate(task.createdAt)}
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
         {task.skills && task.skills.slice(0, 2).map((skill, idx) => (

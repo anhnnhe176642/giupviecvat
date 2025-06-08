@@ -9,6 +9,10 @@ export const MapReference = () => {
   return null;
 };
 
+const formatVND = (amount) => {
+    return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+  };
+
 const TaskMap = ({ 
   mapRef, 
   userLocation, 
@@ -98,7 +102,7 @@ const TaskMap = ({
               </div>
               <strong className="block text-lg mb-1">{task.title}</strong>
               <p className="mb-2 font-medium text-green-600">
-                {task.price}k VNĐ
+                {formatVND(task.price)}
               </p>
               <p className="mb-2 text-sm text-gray-600">
                 <MapPin className="w-3 h-3 inline mr-1" /> {task.location}

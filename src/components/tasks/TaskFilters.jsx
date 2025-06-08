@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Sliders, ArrowDownAZ, FileText, Ruler } from 'lucide-react';
 import { Range, getTrackBackground } from 'react-range';
 import { getCategoryIconElement } from '../../utils/categoryHelpers';
@@ -22,11 +22,40 @@ function TaskFilters({
 }) {
   // Track active filter screen
   const [activeFilterScreen, setActiveFilterScreen] = useState('category'); // 'category', 'distance', 'sort_price'
+  
+  // Temporary price states for immediate UI feedback
+  const [tempMinPrice, setTempMinPrice] = useState(minPrice);
+  const [tempMaxPrice, setTempMaxPrice] = useState(maxPrice);
+  // Temporary search radius for immediate UI feedback
+  const [tempSearchRadius, setTempSearchRadius] = useState(searchRadius);
+  
+  // Reference for timeout to implement debouncing
+  const priceTimeoutRef = useRef(null);
+  const radiusTimeoutRef = useRef(null);
 
   // Format price for display
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN').format(price);
   };
+  
+  // Update temp states when props change
+  useEffect(() => {
+    setTempMinPrice(minPrice);
+    setTempMaxPrice(maxPrice);
+    setTempSearchRadius(searchRadius);
+  }, [minPrice, maxPrice, searchRadius]);
+  
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (priceTimeoutRef.current) {
+        clearTimeout(priceTimeoutRef.current);
+      }
+      if (radiusTimeoutRef.current) {
+        clearTimeout(radiusTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
@@ -125,7 +154,7 @@ function TaskFilters({
               </label>
               
               <div className="text-center text-lg font-semibold text-green-600 mb-2">
-                {searchRadius / 1000} km
+                {tempSearchRadius / 1000} km
               </div>
               
               <input
@@ -133,8 +162,20 @@ function TaskFilters({
                 min="1000"
                 max="500000"
                 step="1000"
-                value={searchRadius}
-                onChange={(e) => setSearchRadius(Number(e.target.value))}
+                value={tempSearchRadius}
+                onChange={(e) => {
+                  const newValue = Number(e.target.value);
+                  setTempSearchRadius(newValue);
+                  
+                  // Debounce the actual state update
+                  if (radiusTimeoutRef.current) {
+                    clearTimeout(radiusTimeoutRef.current);
+                  }
+                  
+                  radiusTimeoutRef.current = setTimeout(() => {
+                    setSearchRadius(newValue);
+                  }, 100);
+                }}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
               />
               
@@ -178,18 +219,28 @@ function TaskFilters({
                 </label>
                 
                 <div className="text-center text-sm font-medium text-green-600 mb-3">
-                  {formatPrice(minPrice)}đ - {formatPrice(maxPrice)}đ
+                  {formatPrice(tempMinPrice)}đ - {formatPrice(tempMaxPrice)}đ
                 </div>
                 
                 <div className="py-4">
                   <Range
-                    step={10000}
+                    step={100000}
                     min={0}
-                    max={5000000}
-                    values={[minPrice, maxPrice]}
+                    max={10000000}
+                    values={[tempMinPrice, tempMaxPrice]}
                     onChange={(values) => {
-                      setMinPrice(values[0]);
-                      setMaxPrice(values[1]);
+                      setTempMinPrice(values[0]);
+                      setTempMaxPrice(values[1]);
+                      
+                      // Debounce the actual state update
+                      if (priceTimeoutRef.current) {
+                        clearTimeout(priceTimeoutRef.current);
+                      }
+                      
+                      priceTimeoutRef.current = setTimeout(() => {
+                        setMinPrice(values[0]);
+                        setMaxPrice(values[1]);
+                      }, 100);
                     }}
                     renderTrack={({ props, children }) => (
                       <div
@@ -197,10 +248,10 @@ function TaskFilters({
                         className="w-full h-2 bg-gray-200 rounded-lg"
                         style={{
                           background: getTrackBackground({
-                            values: [minPrice, maxPrice],
+                            values: [tempMinPrice, tempMaxPrice],
                             colors: ['#e5e7eb', '#10b981', '#e5e7eb'],
                             min: 0,
-                            max: 5000000,
+                            max: 10000000,
                           }),
                         }}
                       >
@@ -217,7 +268,7 @@ function TaskFilters({
                 </div>
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>0đ</span>
-                  <span>5M đ</span>
+                  <span>10M+ đ</span>
                 </div>
               </div>
             </div>

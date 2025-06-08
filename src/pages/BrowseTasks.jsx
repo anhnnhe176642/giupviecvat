@@ -25,7 +25,7 @@ function BrowseTasks() {
   
   // Price filter
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(5000000);
+  const [maxPrice, setMaxPrice] = useState(10000000);
   
   // Sorting
   const [sortBy, setSortBy] = useState("newest"); // Options: newest, nearest, price_low, price_high

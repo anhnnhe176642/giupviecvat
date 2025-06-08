@@ -221,6 +221,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   const resetForm = () => {
     setTitle('');
     setPrice('');
+    setFormattedPrice(''); // Reset formatted price
     setDescription('');
     setTime('Linh hoạt');
     setSkills(['']);
@@ -230,6 +231,21 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
     setLocationError(null);
     setMapStyle('stadiaBright');
     setSelectedCategory(''); // Reset selected category
+  };
+
+  const formatVND = (val) => {
+    if (!val) return '';
+    const number = parseInt(val.replace(/\D/g, ''), 10) || 0;
+    return number.toLocaleString('vi-VN');
+  };
+  
+  const [formattedPrice, setFormattedPrice] = useState('');
+  
+  const handlePriceChange = (e) => {
+    const rawValue = e.target.value;
+    const numericValue = rawValue.replace(/\D/g, '');
+    setPrice(numericValue);
+    setFormattedPrice(formatVND(numericValue));
   };
 
   if (!isOpen) return null;
@@ -286,10 +302,10 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
                 <div className="relative">
                   <input
                     id="price"
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="VD: 100000"
+                    type="text"
+                    value={formattedPrice}
+                    onChange={handlePriceChange}
+                    placeholder="VD: 100,000"
                     className={`w-full px-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm ${
                       formErrors.price ? 'border-red-500' : 'border-gray-200'
                     }`}

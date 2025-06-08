@@ -27,8 +27,8 @@ function App() {
           <Route path="/my-tasks" element={<MyTasks />} />
         </Route>
         <Route path="/browse-tasks" element={<BrowseTasks />} />
-        <Route path="/chat" element={<ChatPage />} />
-        <Route path="/chat/conversation/:id" element={<ChatPage />} />
+        <Route path="/chat" element={user ? <ChatPage /> : <Navigate to="/login" />} />
+        <Route path="/chat/conversation/:id" element={user ? <ChatPage /> : <Navigate to="/login" />} />
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
       </Routes>
       </>

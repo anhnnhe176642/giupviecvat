@@ -446,6 +446,7 @@ const ChatPage = () => {
                       }`}
                       onClick={() => {
                         setCurrentConversation(conversation);
+                        navigate(`/chat/conversation/${conversation._id}`);
                       }}
                     >
                       <div

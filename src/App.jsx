@@ -10,6 +10,7 @@ import MyTasks from "./pages/MyTasks";
 import { Toaster } from "react-hot-toast";
 import { useContext } from "react";
 import { AuthContext } from "./conext/AuthConext"
+import NotFound from "./pages/NotFound";
 
 function App() {
   const {user, isLoading} = useContext(AuthContext);
@@ -30,6 +31,7 @@ function App() {
         <Route path="/chat" element={user ? <ChatPage /> : <Navigate to="/login" />} />
         <Route path="/chat/conversation/:id" element={user ? <ChatPage /> : <Navigate to="/login" />} />
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+        <Route path="*" element={<NotFound/>} />
       </Routes>
       </>
   );

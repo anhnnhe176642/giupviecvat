@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { X, MapPin, Calendar, Clock, Star, Award, Edit, Trash2, Loader } from "lucide-react";
+import { X, MapPin, Calendar, Clock, Star, Award, Edit, Trash2, Loader, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../conext/AuthConext";
 import EditTaskModal from "./tasks/EditTaskModal";
@@ -174,6 +174,12 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask }) =>
                 <div className="flex items-center text-gray-600 rounded-lg p-3 bg-gray-50 shadow-sm">
                   <MapPin className="w-5 h-5 mr-3 text-emerald-500 flex-shrink-0" /> 
                   <span className="font-medium text-gray-700">{task.location}</span>
+                </div>
+                
+                {/* Category */}
+                <div className="flex items-center text-gray-600 rounded-lg p-3 bg-gray-50 shadow-sm">
+                  <Tag className="w-5 h-5 mr-3 text-emerald-500 flex-shrink-0" /> 
+                  <span className="font-medium text-gray-700">{task.category?.name || "Chưa phân loại"}</span>
                 </div>
                 
                 {/* Task description */}

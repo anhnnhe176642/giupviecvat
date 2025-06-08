@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Minus, Compass, Loader } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
+import LocationPicker from './map/LocationPicker';
 
 // Fix for default marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -11,24 +12,6 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
-
-// Location picker component to handle map clicks
-const LocationPicker = ({ position, setPosition }) => {
-  const map = useMapEvents({
-    click(e) {
-      setPosition([e.latlng.lat, e.latlng.lng]);
-    }
-  });
-
-  // Center map on position when it changes
-  useEffect(() => {
-    if (position) {
-      map.flyTo(position, map.getZoom());
-    }
-  }, [position, map]);
-
-  return position ? <Marker position={position} /> : null;
-};
 
 const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   // Form state

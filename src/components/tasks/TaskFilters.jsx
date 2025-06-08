@@ -144,7 +144,7 @@ function TaskFilters({
               <input
                 type="range"
                 min="1000"
-                max="500000"
+                max="50000"
                 step="1000"
                 value={tempSearchRadius}
                 onChange={(e) => {
@@ -162,7 +162,7 @@ function TaskFilters({
               
               <div className="flex justify-between text-xs text-gray-500 mt-2">
                 <span>1 km</span>
-                <span>500 km</span>
+                <span>50 km</span>
               </div>
               
               {!locationActive && (

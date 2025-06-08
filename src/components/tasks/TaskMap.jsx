@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
 import { MapPin } from "lucide-react";
@@ -13,6 +13,32 @@ export const MapReference = ({ mapRef }) => {
       mapRef.current = map;
     }
   }, [map, mapRef]);
+  
+  return null;
+};
+
+// Component to listen for map movements and show circle after zooming
+const ZoomListener = ({ setIsZooming, locationActive, userLocation }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (locationActive && userLocation) {
+      // Set isZooming to true when location is active
+      setIsZooming(true);
+      
+      // Listen for the moveend event (fired after zoom/pan animations complete)
+      const onMoveEnd = () => {
+        setIsZooming(false);
+      };
+      
+      map.on('moveend', onMoveEnd);
+      
+      // Clean up the event listener
+      return () => {
+        map.off('moveend', onMoveEnd);
+      };
+    }
+  }, [map, locationActive, userLocation, setIsZooming]);
   
   return null;
 };
@@ -33,6 +59,8 @@ const TaskMap = ({
   getCategoryIconElement,
   getCategoryColor 
 }) => {
+  const [isZooming, setIsZooming] = useState(false);
+
   return (
     <MapContainer
       center={[16.0583, 108.2772]}
@@ -40,13 +68,18 @@ const TaskMap = ({
       className="w-full h-full z-0"
     >
       <MapReference mapRef={mapRef} />
+      <ZoomListener 
+        setIsZooming={setIsZooming} 
+        locationActive={locationActive} 
+        userLocation={userLocation} 
+      />
       <TileLayer
         attribution=" "
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
 
-      {/* User location circle */}
-      {locationActive && userLocation && (
+      {/* User location circle - only show when not zooming */}
+      {locationActive && userLocation && !isZooming && (
         <Circle
           center={[userLocation.lat, userLocation.lng]}
           radius={searchRadius}

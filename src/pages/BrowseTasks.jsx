@@ -338,7 +338,7 @@ function BrowseTasks() {
       <Header />
       <div className="flex flex-col md:flex-row justify-center px-4 md:px-12 lg:px-32 py-3 gap-4">
         {/* Sidebar */}
-        <div className="w-full md:w-1/3 lg:max-w-md overflow-y-auto p-5 bg-white shadow-lg rounded-xl md:rounded-l-xl md:rounded-r-none border border-gray-100">
+        <div className="w-full md:w-1/3 lg:max-w-md overflow-y-auto p-2 bg-white shadow-lg rounded-xl md:rounded-l-xl md:rounded-r-none border border-gray-100">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text font-bold text-gray-800">Tìm công việc</h2>
             <button

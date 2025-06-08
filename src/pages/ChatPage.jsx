@@ -26,7 +26,6 @@ const ChatPage = () => {
     currentConversation,
     setCurrentConversation,
     unseenMessages,
-    setUnseenMessages,
     messages,
     setMessages,
     loadMoreMessages,
@@ -90,32 +89,6 @@ const ChatPage = () => {
       setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
-    } finally {
-      setSendingMessage(false);
-    }
-  };
-
-  // Function to send job details as a message
-  const handleSendJobDetails = async (jobToSend = null) => {
-    if (!currentConversation || !jobToSend) return;
-
-    try {
-      setSendingMessage(true);
-
-      // Use the job details passed or the current job details state
-      const jobToShare = jobToSend || msg.jobDetails;
-
-      // Generate a descriptive message about the job
-      const jobMessage = `📋 Công việc: ${jobToShare.title}`;
-
-      await sendMessage(
-        currentConversation._id,
-        jobMessage,
-        null, // No image
-        jobToShare // Pass job details
-      );
-    } catch (error) {
-      console.error("Error sending job details:", error);
     } finally {
       setSendingMessage(false);
     }
@@ -263,7 +236,7 @@ const ChatPage = () => {
     if (!jobId) return;
     
     try {
-      const response = await axios.put(`/jobs/${jobId}/status`, { status });
+      const response = await axios.put(`/jobs/${jobId}/status`, { status, conversationId: currentConversation?._id, acceptBy: user?._id });
       
       if (response.data.success) {
         // Update job status in the UI
@@ -293,22 +266,14 @@ const ChatPage = () => {
           }));
         }
         
-        // Notify the client using socket that we updated the job status
-        // This is for debugging purposes, actual updates are sent from server
-        if (socket) {
-          socket.emit("jobStatusUpdateClient", {
-            jobId,
-            status,
-            conversationId: currentConversation?._id
-          });
-        }
+
         
         toast.success(
           status === 'accepted' 
             ? 'Bạn đã chấp nhận công việc này!' 
             : status === 'rejected'
               ? 'Bạn đã từ chối công việc này!'
-              : 'Trạng thái công việc đã được cập nhật!'
+              : 'Bạn đã huỷ công việc này!'
         );
       } else {
         toast.error("Không thể cập nhật trạng thái công việc");
@@ -333,7 +298,6 @@ const ChatPage = () => {
   const handleCancelJob = (jobId) => {
     updateJobStatus(jobId, 'cancelled');
     setIsJobModalOpen(false);
-    toast.success('Công việc đã được huỷ!');
   };
 
   // Function to format time

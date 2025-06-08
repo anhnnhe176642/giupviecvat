@@ -8,8 +8,7 @@ import Header from "../layouts/Header";
 import TaskMap, { MapReference } from "../components/tasks/TaskMap";
 import TaskList from "../components/tasks/TaskList";
 import TaskFilters from "../components/tasks/TaskFilters";
-import { categories, createCategoryIcon, getCategoryColor, getCategoryIconElement, getCategoryName } from "../utils/categoryHelpers";
-import { calculateDistance } from "../utils/mapHelpers";
+import { createCategoryIcon, getCategoryColor, getCategoryIconElement, getCategoryName } from "../utils/categoryHelpers";
 
 function BrowseTasks() {
   const [tasks, setTasks] = useState([]);
@@ -17,10 +16,18 @@ function BrowseTasks() {
   const [error, setError] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Tất cả");
+  const [selectedCategory, setSelectedCategory] = useState("all"); // Changed to "all" as default
   const [showFilters, setShowFilters] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [categories, setCategories] = useState([]); // New state for API categories
+  
+  // Price filter
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(5000000);
+  
+  // Sorting
+  const [sortBy, setSortBy] = useState("newest"); // Options: newest, nearest, price_low, price_high
   
   // Pagination state
   const [page, setPage] = useState(1);
@@ -35,6 +42,29 @@ function BrowseTasks() {
   const [searchRadius, setSearchRadius] = useState(5000); // Default 5km radius
   const mapRef = useRef(null);
   
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("/categories");
+        if (response.data.success) {
+          // Add an "all" category at the beginning
+          const allCategories = [
+            { _id: "all", name: "Tất cả" },
+            ...response.data.categories
+          ];
+          setCategories(allCategories);
+        } else {
+          console.error("Failed to fetch categories:", response.data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+  
   // Fetch tasks from API with pagination
   useEffect(() => {
     const fetchTasks = async () => {
@@ -47,7 +77,10 @@ function BrowseTasks() {
           page: 1,
           limit: 10,
           search: searchTerm,
-          category: selectedCategory !== "Tất cả" ? selectedCategory : undefined
+          category: selectedCategory !== "all" ? selectedCategory : undefined,
+          sort: sortBy,
+          minPrice: minPrice > 0 ? minPrice : undefined,
+          maxPrice: maxPrice < 10000000 ? maxPrice : undefined
         };
         
         // Add location parameters if location is active
@@ -76,7 +109,7 @@ function BrowseTasks() {
     };
 
     fetchTasks();
-  }, [searchTerm, selectedCategory, locationActive, userLocation, searchRadius]);
+  }, [searchTerm, selectedCategory, locationActive, userLocation, searchRadius, minPrice, maxPrice, sortBy]);
   
   // Load more tasks when scrolling
   const loadMoreTasks = async () => {
@@ -91,7 +124,10 @@ function BrowseTasks() {
         page: nextPage,
         limit: 10,
         search: searchTerm,
-        category: selectedCategory !== "Tất cả" ? selectedCategory : undefined
+        category: selectedCategory !== "all" ? selectedCategory : undefined,
+        sort: sortBy,
+        minPrice: minPrice > 0 ? minPrice : undefined,
+        maxPrice: maxPrice < 10000000 ? maxPrice : undefined
       };
       
       // Add location parameters if location is active
@@ -128,7 +164,12 @@ function BrowseTasks() {
   
   // Filter tasks based on search term and category (remove location filtering as it's now done on the backend)
   const filteredTasks = tasks;
-  // Note: No additional filtering needed since all filtering is handled by the backend
+
+  // Get category name by ID
+  const getCategoryNameById = (categoryId) => {
+    const category = categories.find(cat => cat._id === categoryId);
+    return category ? category.name : "Khác";
+  };
 
   // Function to get user's current location
   const getUserLocation = () => {
@@ -303,6 +344,12 @@ function BrowseTasks() {
             setSelectedCategory={setSelectedCategory}
             searchRadius={searchRadius}
             setSearchRadius={setSearchRadius}
+            minPrice={minPrice}
+            setMinPrice={setMinPrice}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
           />
         </div>
 

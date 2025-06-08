@@ -417,7 +417,7 @@ const ChatPage = () => {
                       <div className="flex-1 ml-2">
                         <div className="flex justify-between items-center">
                           <span className={`text-sm font-semibold ${unseenMessages[conversation._id] > 0 ? 'font-bold text-black' : 'font-medium text-gray-700'}`}>
-                            {conversation.name}
+                            {conversation.postTask.title || "Unknown"}
                           </span>
                           {conversation.lastMessagePreview && (
                             <span className="text-xs text-gray-500">
@@ -448,9 +448,9 @@ const ChatPage = () => {
             </div>
 
             {/* Chat Area */}
-            <div className="flex flex-col flex-auto h-full p-3 md:p-6 max-w-full">
+            <div className="flex flex-col flex-auto h-[82vh] p-3 md:p-6 max-w-full">
               {/* Mobile menu button */}
-              <div className="flex items-center md:hidden mb-4">
+              <div className="flex items-center mb-4">
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   className="p-2 rounded-full hover:bg-gray-100 mr-2"
@@ -458,15 +458,25 @@ const ChatPage = () => {
                   <Menu size={20} />
                 </button>
                 <div className="flex items-center">
-                  <img
-                    src="https://randomuser.me/api/portraits/women/21.jpg"
-                    alt="Contact"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                  <div className="ml-2">
-                    <h3 className="font-medium">Nguyễn Thị B</h3>
-                    <p className="text-xs text-green-600">Đang hoạt động</p>
-                  </div>
+                  {currentConversation && (
+                    <>
+                      <img
+                        src={currentConversation.participants?.find(participant => participant._id !== user?._id)?.profilePicture || "https://randomuser.me/api/portraits/lego/1.jpg"}
+                        alt="Contact"
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <div className="ml-2">
+                        <h3 className="font-medium">
+                          {currentConversation.participants?.find(participant => participant._id !== user?._id)?.name || "Unknown User"}
+                        </h3>
+                        <p className="text-xs text-green-600">
+                          {onlineUsers?.includes(currentConversation.participants?.find(participant => participant._id !== user?._id)?._id) 
+                            ? "Online" 
+                            : "Offline"}
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
               {currentConversation ? (

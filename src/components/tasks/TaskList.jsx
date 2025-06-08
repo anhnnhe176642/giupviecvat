@@ -26,7 +26,7 @@ const TaskList = ({
   if (error) {
     return (
       <div className="text-center py-10">
-        <div className="inline-block rounded-full h-12 w-12 bg-red-100 flex items-center justify-center">
+        <div className="inline-block rounded-full h-12 w-12 bg-red-100 items-center justify-center">
           <span className="text-red-500 text-2xl">!</span>
         </div>
         <p className="mt-3 text-red-500">{error}</p>

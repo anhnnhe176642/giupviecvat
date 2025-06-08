@@ -34,7 +34,7 @@ const ChatPage = () => {
     sendMessage,
   } = useContext(ChatContext);
 
-  const { onlineUsers, user, socket } = useContext(AuthContext);
+  const { onlineUsers, user } = useContext(AuthContext);
   const messagesContainerRef = useRef(null);
   const scrollEnd = useRef();
   const [message, setMessage] = useState("");
@@ -183,14 +183,15 @@ const ChatPage = () => {
   // Keep scroll position when loading older messages
   useEffect(() => {
     if (isLoadingMore && messagesContainerRef.current) {
-      // Store current scroll height before new messages are added
-      const scrollHeight = messagesContainerRef.current.scrollHeight;
+      // Store current scroll height and ref before new messages are added
+      const container = messagesContainerRef.current;
+      const scrollHeight = container.scrollHeight;
 
       // After new messages are loaded and rendered, adjust the scroll position
       return () => {
-        if (messagesContainerRef.current) {
-          const newScrollHeight = messagesContainerRef.current.scrollHeight;
-          messagesContainerRef.current.scrollTop = newScrollHeight - scrollHeight;
+        if (container) {
+          const newScrollHeight = container.scrollHeight;
+          container.scrollTop = newScrollHeight - scrollHeight;
         }
       };
     }

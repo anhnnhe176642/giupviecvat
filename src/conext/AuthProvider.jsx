@@ -141,6 +141,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     axios,
     user,
+    setUser,
     onlineUsers,
     socket,
     isLoading,

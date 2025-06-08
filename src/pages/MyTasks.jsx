@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect, useContext } from 'react';
 import TaskOffersModal from '../components/TaskOffersModal';
 import RatingModal from '../components/RatingModal';
+import { AuthContext } from '../conext/AuthConext';
 
 const MyTasks = () => {
   const [activeTab, setActiveTab] = useState('posted');
@@ -10,8 +10,7 @@ const MyTasks = () => {
   const [showOffersPopup, setShowOffersPopup] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
-  const { user } = useSelector(state => state.auth);
-
+  const { user } = useContext(AuthContext);
   // Mock task data - in a real app, you'd fetch this from your API
   useEffect(() => {
     // Simulate API call

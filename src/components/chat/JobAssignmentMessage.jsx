@@ -1,7 +1,7 @@
 import React from 'react';
 import { ExternalLink, CheckCircle, XCircle, Clock, Trash } from 'lucide-react';
 
-const JobAssignmentMessage = ({ job, onViewDetails, timestamp, sender, isOutgoing, onAccept, onDecline, onCancel }) => {
+const JobAssignmentMessage = ({ job, onViewDetails, timestamp, sender, isOutgoing, onAccept, onDecline, onCancel, profilePicture }) => {
   // Function to format date in a more readable way
   const formatDate = (dateString) => {
     try {
@@ -59,8 +59,18 @@ const JobAssignmentMessage = ({ job, onViewDetails, timestamp, sender, isOutgoin
       <div className={`flex flex-row items-center ${isOutgoing ? 'justify-end' : ''}`}>
         {/* Only show avatar for incoming messages */}
         {!isOutgoing && (
-          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0 text-white">
-            {sender?.charAt(0) || '?'}
+          <div className="flex items-center justify-center h-10 w-10 rounded-full flex-shrink-0 overflow-hidden">
+            {profilePicture ? (
+              <img 
+                src={profilePicture} 
+                alt={sender}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center bg-indigo-500 text-white">
+                {sender?.charAt(0) || '?'}
+              </div>
+            )}
           </div>
         )}
         
@@ -132,8 +142,18 @@ const JobAssignmentMessage = ({ job, onViewDetails, timestamp, sender, isOutgoin
         
         {/* Only show avatar for outgoing messages on the right */}
         {isOutgoing && (
-          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-600 flex-shrink-0 text-white">
-            {sender?.charAt(0) || 'Me'}
+          <div className="flex items-center justify-center h-10 w-10 rounded-full flex-shrink-0 overflow-hidden">
+            {profilePicture ? (
+              <img 
+                src={profilePicture} 
+                alt={sender}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center bg-indigo-600 text-white">
+                {sender?.charAt(0) || 'Me'}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -543,6 +543,7 @@ const ChatPage = () => {
                                   onAccept={() => handleAcceptJob(msg.jobDetails._id)}
                                   onDecline={() => handleDeclineJob(msg.jobDetails._id)}
                                   onCancel={() => handleCancelJob(msg.jobDetails._id)}
+                                  profilePicture={msg.sender.profilePicture}
                                 />
                               ) : (
                                 <Message
@@ -551,6 +552,7 @@ const ChatPage = () => {
                                   sender={msg.sender.name}
                                   isOutgoing={msg.sender._id === user._id}
                                   image={msg.image}
+                                  profilePicture={msg.sender.profilePicture}
                                 />
                               )}
                             </div>

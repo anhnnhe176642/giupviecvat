@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../conext/AuthConext';
 
@@ -6,14 +6,34 @@ function Header() {
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   
   const handleLogout = () => {
-    logout()
+    setIsProfileDropdownOpen(false);
+    logout();
     navigate("/");
   };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const toggleProfileDropdown = () => {
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
   return (
@@ -40,8 +60,53 @@ function Header() {
         </div>
         <div className="flex items-center space-x-4">
           {user ? (
-            <div className="hidden md:block">
-              <button onClick={handleLogout} className="text-gray-600 hover:text-blue-600">Đăng xuất</button>
+            <div className="hidden md:block relative" ref={dropdownRef}>
+              <button 
+                onClick={toggleProfileDropdown} 
+                className="flex items-center space-x-2 focus:outline-none"
+              >
+                <img
+                  src={user.profilePicture || "https://cdn-icons-png.flaticon.com/512/10337/10337609.png"}
+                  alt="Profile"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <span className="text-gray-700">{user.name || "User"}</span>
+                <svg 
+                  className={`h-4 w-4 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                  <div className="py-1">
+                    <Link 
+                      to="/profile" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                    >
+                      Hồ sơ cá nhân
+                    </Link>
+                    <Link 
+                      to="/manage-tasks" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                    >
+                      Quản lí công việc
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Đăng xuất
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="hidden md:flex space-x-4 items-center">
@@ -80,7 +145,19 @@ function Header() {
             )}
             
             {user ? (
-              <button onClick={handleLogout} className="text-gray-600 hover:text-blue-600 py-2 text-left">Đăng xuất</button>
+              <>
+                <div className="flex items-center space-x-2 py-2">
+                  <img
+                    src={user.profilePicture || "https://via.placeholder.com/40"}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  <span className="text-gray-700">{user.name || "User"}</span>
+                </div>
+                <Link to="/profile" className="text-gray-600 hover:text-blue-600 py-2 pl-10">Hồ sơ cá nhân</Link>
+                <Link to="/manage-tasks" className="text-gray-600 hover:text-blue-600 py-2 pl-10">Quản lí công việc</Link>
+                <button onClick={handleLogout} className="text-gray-600 hover:text-blue-600 py-2 text-left pl-10">Đăng xuất</button>
+              </>
             ) : (
               <>
                 <Link to="/login" className="text-gray-600 hover:text-blue-600 py-2">Đăng nhập</Link>

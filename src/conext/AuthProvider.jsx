@@ -55,6 +55,7 @@ export const AuthProvider = ({ children }) => {
       console.error("Login error:", error);
       toast.error("An error occurred during login.");
     }
+    window.location.reload();
   };
 
   const googleLogin = async (credentialResponse) => {
@@ -78,6 +79,7 @@ export const AuthProvider = ({ children }) => {
       console.error("Google login error:", error);
       toast.error("An error occurred during Google login.");
     }
+    window.location.reload();
   };
 
   const logout = async () => {

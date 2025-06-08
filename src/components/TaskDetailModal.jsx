@@ -31,7 +31,7 @@ const formatDate = (dateString) => {
   }).format(date);
 };
 
-const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask, onContactClick }) => {
+const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -228,7 +228,7 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask, onCo
                   <h3 className="font-semibold text-gray-800 mb-4 text-lg relative">Người đăng việc</h3>
                   <div className="flex items-center relative">
                     <img 
-                      src={task.poster?.avatar || "https://randomuser.me/api/portraits/men/32.jpg"} 
+                      src={task.poster?.profilePicture || "https://cdn-icons-png.flaticon.com/512/10337/10337609.png"} 
                       alt="Poster" 
                       className="w-14 h-14 rounded-full mr-4 object-cover ring-4 ring-white shadow-md flex-shrink-0"
                     />

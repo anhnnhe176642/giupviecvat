@@ -2,61 +2,94 @@ import React, { useState, useEffect, useContext } from 'react';
 import TaskOffersModal from '../components/TaskOffersModal';
 import RatingModal from '../components/RatingModal';
 import { AuthContext } from '../conext/AuthConext';
+import axios from 'axios';
 
 const MyTasks = () => {
   const [activeTab, setActiveTab] = useState('posted');
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState({
+    posted: [],
+    assigned: [],
+    completed: []
+  });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showOffersPopup, setShowOffersPopup] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const { user } = useContext(AuthContext);
-  // Mock task data - in a real app, you'd fetch this from your API
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const mockTasks = {
-        posted: [
-          { 
-            id: 1, 
-            title: 'Sửa máy giặt', 
-            budget: '200.000đ', 
-            location: 'Hoà Lạc', 
-            postedDate: '01/06/2025', 
-            offers: 5,
-            offersList: [
-              { id: 101, userId: 201, name: 'Nguyễn Văn A', avatar: 'https://randomuser.me/api/portraits/men/1.jpg', rating: 4.8, completedTasks: 27, greeting: 'Tôi có 5 năm kinh nghiệm sửa máy giặt và có thể hoàn thành công việc trong 7 ngày.' },
-              { id: 102, userId: 202, name: 'Trần Thị B', avatar: 'https://randomuser.me/api/portraits/women/2.jpg', rating: 4.9, completedTasks: 42, greeting: 'Chào bạn! Tôi chuyên sửa chữa các loại máy giặt với hơn 50 ca thành công.' },
-              { id: 103, userId: 203, name: 'Lê Văn C', avatar: 'https://randomuser.me/api/portraits/men/3.jpg', rating: 4.7, completedTasks: 18, greeting: 'Tôi cam kết sẽ sửa chữa máy giặt của bạn nhanh chóng và hiệu quả.' },
-              { id: 104, userId: 204, name: 'Phạm Thị D', avatar: 'https://randomuser.me/api/portraits/women/4.jpg', rating: 5.0, completedTasks: 31, greeting: 'Tôi có thể sửa chữa tất cả các loại máy giặt với chất lượng tốt nhất.' },
-              { id: 105, userId: 205, name: 'Hoàng Văn E', avatar: 'https://randomuser.me/api/portraits/men/5.jpg', rating: 4.6, completedTasks: 15, greeting: 'Với kinh nghiệm sửa chữa máy giặt cho nhiều gia đình, tôi tự tin có thể đáp ứng yêu cầu của bạn.' }
-            ]
-          },
-          { 
-            id: 2, 
-            title: 'Sửa máy tính', 
-            budget: '500.000đ', 
-            location: 'Hà Nội', 
-            postedDate: '03/06/2025', 
-            offers: 2,
-            offersList: [
-              { id: 106, userId: 206, name: 'Vũ Văn F', avatar: 'https://randomuser.me/api/portraits/men/6.jpg', rating: 4.5, completedTasks: 23, greeting: 'Tôi là kỹ thuật viên với 7 năm kinh nghiệm sửa chữa máy tính.' },
-              { id: 107, userId: 207, name: 'Đặng Thị G', avatar: 'https://randomuser.me/api/portraits/women/7.jpg', rating: 4.3, completedTasks: 12, greeting: 'Tôi có thể sửa chữa phần cứng và phần mềm cho máy tính của bạn trong vòng 2 giờ.' }
-            ]
-          },
-        ],
-        assigned: [
-          { id: 3, title: 'Dọn dẹp nhà cửa', budget: '300.000đ', location: 'Hồ Chí Minh', assignedTo: 'Nguyễn Văn A', dueDate: '10/06/2025' },
-        ],
-        completed: [
-          { id: 4, title: 'Dạy học piano', budget: '1.500.000đ', location: 'Đà Nẵng', completedDate: '28/05/2025', tasker: 'Trần Thị B' },
-        ],
-      };
+  
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    current: 1,
+    limit: 5,
+    total: 0,
+    pages: 0,
+    hasNext: false,
+    hasPrev: false
+  });
+
+  // Function to fetch tasks based on active tab
+  const fetchTasks = async (page = 1) => {
+    if (!user?._id) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Determine status based on activeTab
+      let status;
+      switch (activeTab) {
+        case 'posted':
+          status = 'open'; // Tasks posted but not assigned yet
+          break;
+        case 'assigned':
+          status = 'assigned'; // Tasks that are assigned and in progress
+          break;
+        case 'completed':
+          status = 'completed'; // Completed tasks
+          break;
+        default:
+          status = 'open';
+      }
       
-      setTasks(mockTasks);
+      const response = await axios.get('/tasks', {
+        params: {
+          poster: user._id,
+          status: status,
+          page: page,
+          limit: pagination.limit
+        }
+      });
+      
+      if (response.data.success) {
+        // Update tasks based on the active tab
+        setTasks(prev => ({
+          ...prev,
+          [activeTab]: response.data.tasks
+        }));
+        
+        // Update pagination state
+        setPagination(response.data.pagination);
+      } else {
+        setError('Failed to load tasks');
+      }
+    } catch (err) {
+      console.error('Error fetching tasks:', err);
+      setError('Error loading tasks. Please try again later.');
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
+
+  // Fetch tasks when tab changes or user changes
+  useEffect(() => {
+    fetchTasks(1); // Reset to first page when tab changes
+  }, [activeTab, user?._id]);
+
+  // Handle page change
+  const handlePageChange = (newPage) => {
+    fetchTasks(newPage);
+  };
 
   const openOffersPopup = (task) => {
     setSelectedTask(task);
@@ -81,7 +114,6 @@ const MyTasks = () => {
   const handleRatingSubmit = (ratingData) => {
     console.log('Rating submitted:', ratingData);
     // Here you would typically send this data to your API
-    // For now, just log it to console
   };
 
   // if (!user) {
@@ -139,101 +171,144 @@ const MyTasks = () => {
           <div className="p-6 text-center">
             <p className="text-gray-500">Đang tải công việc...</p>
           </div>
-        ) : tasks[activeTab] && tasks[activeTab].length > 0 ? (
-          <div className="divide-y divide-gray-200">
-            {activeTab === 'posted' && (
-              <>
-                {tasks.posted.map(task => (
-                  <div key={task.id} className="p-6 hover:bg-gray-50">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">{task.title}</h3>
-                        <div className="flex items-center text-gray-600 text-sm space-x-4 mb-3">
-                          <span>{task.location}</span>
-                          <span>•</span>
-                          <span>Ngân sách: {task.budget}</span>
-                          <span>•</span>
-                          <span>Đăng ngày: {task.postedDate}</span>
-                        </div>
-                        <div className="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-sm inline-block">
-                          {task.offers} đề nghị
-                        </div>
-                      </div>
-                      <button 
-                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
-                        onClick={() => openOffersPopup(task)}
-                      >
-                        Xem đề nghị
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
-
-            {activeTab === 'assigned' && (
-              <>
-                {tasks.assigned.map(task => (
-                  <div key={task.id} className="p-6 hover:bg-gray-50">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">{task.title}</h3>
-                        <div className="flex items-center text-gray-600 text-sm space-x-4 mb-3">
-                          <span>{task.location}</span>
-                          <span>•</span>
-                          <span>Ngân sách: {task.budget}</span>
-                          <span>•</span>
-                          <span>Thực hiện bởi: {task.assignedTo}</span>
-                        </div>
-                        <div className="bg-yellow-100 text-yellow-800 py-1 px-3 rounded-full text-sm inline-block">
-                          Hạn: {task.dueDate}
-                        </div>
-                      </div>
-                      <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm">
-                        Hoàn thành
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
-
-            {activeTab === 'completed' && (
-              <>
-                {tasks.completed.map(task => (
-                  <div key={task.id} className="p-6 hover:bg-gray-50">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">{task.title}</h3>
-                        <div className="flex items-center text-gray-600 text-sm space-x-4 mb-3">
-                          <span>{task.location}</span>
-                          <span>•</span>
-                          <span>Ngân sách: {task.budget}</span>
-                          <span>•</span>
-                          <span>Hoàn thành: {task.completedDate}</span>
-                        </div>
-                        <div className="bg-green-100 text-green-800 py-1 px-3 rounded-full text-sm inline-block">
-                          Đã hoàn thành
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-gray-600 mb-2">Thực hiện bởi: {task.tasker}</p>
-                        <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 text-sm mr-2">
-                          Xem chi tiết
-                        </button>
-                        <button 
-                          className="bg-blue-500 text-gray-50 px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
-                          onClick={() => openRatingModal(task)}
-                        >
-                          Đánh giá
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
+        ) : error ? (
+          <div className="p-6 text-center">
+            <p className="text-red-500">{error}</p>
           </div>
+        ) : tasks[activeTab] && tasks[activeTab].length > 0 ? (
+          <>
+            <div className="divide-y divide-gray-200">
+              {activeTab === 'posted' && (
+                <>
+                  {tasks.posted.map(task => (
+                    <div key={task._id} className="p-6 hover:bg-gray-50">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-xl font-semibold mb-2">{task.title}</h3>
+                          <div className="flex items-center text-gray-600 text-sm space-x-4 mb-3">
+                            <span>{task.location}</span>
+                            <span>•</span>
+                            <span>Ngân sách: {task.price.toLocaleString('vi-VN')}đ</span>
+                            <span>•</span>
+                            <span>Đăng ngày: {new Date(task.createdAt).toLocaleDateString('vi-VN')}</span>
+                          </div>
+                          <div className="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-sm inline-block">
+                            {task.offers?.length || 0} đề nghị
+                          </div>
+                        </div>
+                        <button 
+                          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
+                          onClick={() => openOffersPopup(task)}
+                        >
+                          Xem đề nghị
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {activeTab === 'assigned' && (
+                <>
+                  {tasks.assigned.map(task => (
+                    <div key={task._id} className="p-6 hover:bg-gray-50">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-xl font-semibold mb-2">{task.title}</h3>
+                          <div className="flex items-center text-gray-600 text-sm space-x-4 mb-3">
+                            <span>{task.location}</span>
+                            <span>•</span>
+                            <span>Ngân sách: {task.price.toLocaleString('vi-VN')}đ</span>
+                            <span>•</span>
+                            <span>Thực hiện bởi: {task.assignedTo?.name || 'Không xác định'}</span>
+                          </div>
+                          <div className="bg-yellow-100 text-yellow-800 py-1 px-3 rounded-full text-sm inline-block">
+                            Hạn: {task.deadline ? new Date(task.deadline).toLocaleDateString('vi-VN') : 'Không có'}
+                          </div>
+                        </div>
+                        <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm">
+                          Hoàn thành
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {activeTab === 'completed' && (
+                <>
+                  {tasks.completed.map(task => (
+                    <div key={task._id} className="p-6 hover:bg-gray-50">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-xl font-semibold mb-2">{task.title}</h3>
+                          <div className="flex items-center text-gray-600 text-sm space-x-4 mb-3">
+                            <span>{task.location}</span>
+                            <span>•</span>
+                            <span>Ngân sách: {task.price.toLocaleString('vi-VN')}đ</span>
+                            <span>•</span>
+                            <span>Hoàn thành: {task.completedAt ? new Date(task.completedAt).toLocaleDateString('vi-VN') : 'Không xác định'}</span>
+                          </div>
+                          <div className="bg-green-100 text-green-800 py-1 px-3 rounded-full text-sm inline-block">
+                            Đã hoàn thành
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-gray-600 mb-2">Thực hiện bởi: {task.assignedTo?.name || 'Không xác định'}</p>
+                          <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 text-sm mr-2">
+                            Xem chi tiết
+                          </button>
+                          <button 
+                            className="bg-blue-500 text-gray-50 px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
+                            onClick={() => openRatingModal(task)}
+                          >
+                            Đánh giá
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+            
+            {/* Pagination Controls */}
+            {pagination.pages > 1 && (
+              <div className="flex items-center justify-center p-6 border-t border-gray-200">
+                <button 
+                  onClick={() => handlePageChange(pagination.current - 1)}
+                  disabled={!pagination.hasPrev}
+                  className={`mx-1 px-3 py-1 rounded ${pagination.hasPrev 
+                    ? 'bg-gray-200 hover:bg-gray-300' 
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+                >
+                  &lt; Trước
+                </button>
+                
+                {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`mx-1 px-3 py-1 rounded ${pagination.current === page 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-200 hover:bg-gray-300'}`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button 
+                  onClick={() => handlePageChange(pagination.current + 1)}
+                  disabled={!pagination.hasNext}
+                  className={`mx-1 px-3 py-1 rounded ${pagination.hasNext 
+                    ? 'bg-gray-200 hover:bg-gray-300' 
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+                >
+                  Sau &gt;
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="p-6 text-center">
             <p className="text-gray-500">Không có công việc nào trong mục này</p>

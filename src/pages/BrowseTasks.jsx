@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Filter, Plus, Search } from "lucide-react";
 import "leaflet/dist/leaflet.css";
@@ -17,6 +17,7 @@ function BrowseTasks() {
   const [error, setError] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [inputValue, setInputValue] = useState(""); // New state for immediate input value
   const [selectedCategory, setSelectedCategory] = useState("all"); // Changed to "all" as default
   const [showFilters, setShowFilters] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -151,11 +152,6 @@ function BrowseTasks() {
       setIsLoadingMore(false);
     }
   };
-
-  // Handle contact click (e.g., to open chat)
-  const handleConactClick = (task) => {
-
-  }
   
   // Handle scroll to load more tasks
   const handleScroll = (e) => {
@@ -328,9 +324,33 @@ function BrowseTasks() {
   };
 
   const getPosterImage = (task) => {
+    console.log("Task poster:", task.poster);
     return task.poster && task.poster.profilePicture 
       ? task.poster.profilePicture 
       : "https://cdn-icons-png.flaticon.com/512/10337/10337609.png"; // Fallback image
+  };
+
+  // Store the timer in a ref to preserve it between renders
+  const searchTimerRef = useRef(null);
+  
+  // Debounced search function using useCallback with proper dependencies
+  const debouncedSearch = useCallback((value) => {
+    // Clear any pending timers
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
+    
+    // Set a new timer
+    searchTimerRef.current = setTimeout(() => {
+      setSearchTerm(value);
+    }, 500);
+  }, []);
+  
+  // Handle input change with debounce
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setInputValue(value);  // Update input value immediately for UI response
+    debouncedSearch(value); // Debounce the actual search term update
   };
 
   return (
@@ -359,8 +379,8 @@ function BrowseTasks() {
               type="text"
               placeholder="Tìm kiếm công việc..."
               className="w-full py-2.5 pl-10 pr-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={inputValue}
+              onChange={handleSearchInputChange}
             />
           </div>
 
@@ -443,7 +463,6 @@ function BrowseTasks() {
           task={selectedTask !== null ? filteredTasks[selectedTask] : null}
           onEditTask={handleEditTask}
           onDeleteTask={handleDeleteTask}
-          onContactClick={handleConactClick}
         />
 
         {/* Create Task Modal */}

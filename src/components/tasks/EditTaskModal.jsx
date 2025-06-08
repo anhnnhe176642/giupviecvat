@@ -191,6 +191,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
   const handleSubmit = () => {
     if (validateForm()) {
       const editedTask = {
+        _id: task._id,
         title,
         price: Number(price),
         description,
@@ -530,7 +531,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
       </div>
       
       {/* Add custom scrollbar */}
-      <style jsx global>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }

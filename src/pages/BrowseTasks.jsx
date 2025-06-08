@@ -264,6 +264,62 @@ function BrowseTasks() {
     setIsCreateModalOpen(false);
   };
 
+  const handleEditTask = async (updatedTask) => {
+    try {
+      // Show loading indicator or disable submit button (would be implemented in a real app)
+      console.log("Updating task:", updatedTask);
+      // Send updated data to backend API
+      const response = await axios.put(`/tasks/${updatedTask._id}`, updatedTask);
+      
+      if (response.data.success) {
+        // Update the task in the current tasks list
+        setTasks(prevTasks => 
+          prevTasks.map(task => 
+            task._id === updatedTask._id ? response.data.task : task
+          )
+        );
+        
+        // Show success message
+        toast("Công việc đã được cập nhật thành công!");
+        
+        // Close the modal
+        setIsModalOpen(false);
+      } else {
+        // Show error message
+        toast("Lỗi: " + response.data.message);
+      }
+    } catch (error) {
+      console.error("Error updating task:", error);
+      toast("Đã xảy ra lỗi khi cập nhật công việc. Vui lòng thử lại sau.");
+    }
+  }
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      // Show loading indicator or disable delete button (would be implemented in a real app)
+      
+      // Send delete request to backend API
+      const response = await axios.delete(`/tasks/${taskId}`);
+      
+      if (response.data.success) {
+        // Remove the task from the current tasks list
+        setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
+        
+        // Show success message
+        toast("Công việc đã được xóa thành công!");
+        
+        // Close the modal
+        setIsModalOpen(false);
+      } else {
+        // Show error message
+        toast("Lỗi: " + response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      toast("Đã xảy ra lỗi khi xóa công việc. Vui lòng thử lại sau.");
+    }
+  }
+
   // Helper function to get task poster name and image
   const getPosterName = (task) => {
     return task.poster ? task.poster.name : "Unknown User";
@@ -383,6 +439,8 @@ function BrowseTasks() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           task={selectedTask !== null ? filteredTasks[selectedTask] : null}
+          onEditTask={handleEditTask}
+          onDeleteTask={handleDeleteTask}
         />
 
         {/* Create Task Modal */}

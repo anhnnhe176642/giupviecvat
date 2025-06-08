@@ -527,7 +527,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
       </div>
       
       {/* Add custom scrollbar */}
-      <style jsx global>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }

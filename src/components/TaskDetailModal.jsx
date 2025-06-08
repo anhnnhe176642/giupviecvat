@@ -3,6 +3,9 @@ import { X, MapPin, Calendar, Clock, Star, Award, Edit, Trash2, Loader } from "l
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../conext/AuthConext";
 import EditTaskModal from "./tasks/EditTaskModal";
+import toast from "react-hot-toast";
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 // Function to format currency
 const formatCurrency = (amount) => {
@@ -59,18 +62,62 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask }) =>
   };
   
   const handleDeleteClick = async () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa công việc này?")) {
-      setIsDeleting(true);
-      try {
-        await onDeleteTask(task._id);
-        setIsDeleting(false);
-        onClose();
-      } catch (error) {
-        console.error("Error deleting task:", error);
-        setIsDeleting(false);
-        alert("Không thể xóa công việc. Vui lòng thử lại sau.");
-      }
-    }
+    confirmAlert({
+      title: 'Xác nhận xóa',
+      message: 'Bạn có chắc chắn muốn xóa công việc này?',
+      buttons: [
+        {
+          label: 'Có',
+          onClick: async () => {
+            setIsDeleting(true);
+            try {
+              await onDeleteTask(task._id);
+              setIsDeleting(false);
+              onClose();
+              toast.success("Xóa công việc thành công");
+            } catch (error) {
+              console.error("Error deleting task:", error);
+              setIsDeleting(false);
+              toast.error("Không thể xóa công việc. Vui lòng thử lại sau.");
+            }
+          },
+          className: 'bg-red-600 text-white hover:bg-red-700'
+        },
+        {
+          label: 'Không',
+          onClick: () => {},
+          className: 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+        }
+      ],
+      closeOnEscape: true,
+      closeOnClickOutside: true,
+      overlayClassName: "confirm-alert-overlay",
+      customUI: ({ title, message, onClose, buttons }) => (
+        <div className='bg-white rounded-xl shadow-lg p-6 min-w-[300px] max-w-md'>
+          <h1 className='text-xl font-bold text-gray-800 mb-2'>{title}</h1>
+          <p className='text-gray-600 mb-6'>{message}</p>
+          <div className='flex justify-end gap-3'>
+            {buttons.map((button, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  button.onClick();
+                  onClose();
+                }}
+                className={`px-4 py-2 rounded-lg font-medium ${button.className}`}
+              >
+                {button.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )
+    });
+  };
+
+  const handleEditTask = (editedTask) => {
+    // Pass the entire editedTask object to the parent component
+    onEditTask(editedTask);
   };
 
   if (!isOpen || !task) return null;
@@ -238,7 +285,7 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask }) =>
       </div>
       
       {/* Add global styles for custom scrollbar and grid pattern */}
-      <style jsx global>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
@@ -267,7 +314,7 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask }) =>
           onClose={() => setShowEditModal(false)}
           task={task}
           onEditTask={(editedTask) => {
-            onEditTask(task._id, editedTask);
+            handleEditTask(editedTask);
             setShowEditModal(false);
           }}
         />

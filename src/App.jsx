@@ -11,6 +11,7 @@ import { Toaster } from "react-hot-toast";
 import { useContext } from "react";
 import { AuthContext } from "./conext/AuthContext"
 import NotFound from "./pages/NotFound";
+import Register from "./pages/Register";
 
 function App() {
   const {user, isLoading} = useContext(AuthContext);
@@ -31,6 +32,7 @@ function App() {
         <Route path="/chat" element={user ? <ChatPage /> : <Navigate to="/login" />} />
         <Route path="/chat/conversation/:id" element={user ? <ChatPage /> : <Navigate to="/login" />} />
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+        <Route path="/register" element={<Register/>} />
         <Route path="*" element={<NotFound/>} />
       </Routes>
       </>

@@ -10,7 +10,7 @@ import { ChatProvider } from "./conext/ChatProvider.jsx";
 createRoot(document.getElementById("root")).render(
   <AuthProvider>
     <ChatProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/giupviecvat">
         <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
           <App />
         </GoogleOAuthProvider>

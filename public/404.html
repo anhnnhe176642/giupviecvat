@@ -1,5 +1,18 @@
 <script>
-  // Redirect về index.html và giữ nguyên path
-  sessionStorage.redirect = location.href;
-  window.location.href = "/";
+  // Save the URL path excluding the base path
+  const pathSegments = window.location.pathname.split('/');
+  const repoName = 'giupviecvat';
+  
+  // Remove the repo name from the path if it exists at the start
+  if (pathSegments[1] === repoName) {
+    pathSegments.splice(1, 1);
+  }
+  
+  const redirectPath = pathSegments.join('/');
+  
+  // Store the full intended URL
+  sessionStorage.redirect = window.location.origin + '/' + repoName + redirectPath + window.location.search + window.location.hash;
+  
+  // Redirect to the base URL
+  window.location.href = '/' + repoName;
 </script>

@@ -207,12 +207,12 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   const tileProviders = {
     stadiaBright: {
       url: 'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png',
-      attribution: ' ',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       name: 'Stadia Bright'
     },
     stadiaSatellite: {
       url: 'https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.png',
-      attribution: ' ',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       name: 'Stadia Satellite'
     }
   };

@@ -92,7 +92,7 @@ function Header() {
                       Hồ sơ cá nhân
                     </Link>
                     <Link 
-                      to="/manage-tasks" 
+                      to="/dashboard" 
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       onClick={() => setIsProfileDropdownOpen(false)}
                     >
@@ -155,7 +155,7 @@ function Header() {
                   <span className="text-gray-700">{user.name || "User"}</span>
                 </div>
                 <Link to="/profile" className="text-gray-600 hover:text-blue-600 py-2 pl-10">Hồ sơ cá nhân</Link>
-                <Link to="/manage-tasks" className="text-gray-600 hover:text-blue-600 py-2 pl-10">Quản lí công việc</Link>
+                <Link to="/dashboard" className="text-gray-600 hover:text-blue-600 py-2 pl-10">Quản lí công việc</Link>
                 <button onClick={handleLogout} className="text-gray-600 hover:text-blue-600 py-2 text-left pl-10">Đăng xuất</button>
               </>
             ) : (

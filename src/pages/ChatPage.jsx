@@ -427,7 +427,7 @@ const ChatPage = () => {
                       <div className="flex-1 ml-2">
                         <div className="flex justify-between items-center max-w-40 truncate">
                           <span className={`text-sm font-semibold ${unseenMessages[conversation._id] > 0 ? 'font-bold text-black' : 'font-medium text-gray-700'}`}>
-                            {conversation.postTask.title || "Unknown"}
+                            {conversation.postTask?.title || "Unknown"}
                           </span>
                           {conversation.lastMessagePreview && (
                             <span className="text-xs text-gray-500">

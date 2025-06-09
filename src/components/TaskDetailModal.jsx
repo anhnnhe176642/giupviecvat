@@ -186,7 +186,7 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask }) =>
           {/* Scrollable content */}
           <div className="overflow-y-auto flex-1 p-6 custom-scrollbar">
             <div className="space-y-6">
-              <h1 className="text-2xl font-bold text-gray-800">{task.title}</h1>
+              <h1 className="text-2xl font-bold text-gray-800 break-all">{task.title}</h1>
               
               {/* Price and badges */}
               <div className="flex flex-wrap items-center justify-between pb-5 gap-4 border-b border-gray-100">

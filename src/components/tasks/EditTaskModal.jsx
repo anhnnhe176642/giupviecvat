@@ -291,6 +291,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
                   id="title"
                   type="text"
                   value={title}
+                  maxLength={35}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="VD: Dọn dẹp nhà cửa, Sửa máy giặt..."
                   className={`w-full px-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm ${

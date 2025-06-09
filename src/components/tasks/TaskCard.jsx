@@ -45,11 +45,6 @@ const TaskCard = ({
     }
   };
   
-  const truncateText = (text, maxLength = 40) => {
-    if (!text) return "";
-    return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
-  };
-  
   return (
     <div
       key={task._id || index}
@@ -62,7 +57,7 @@ const TaskCard = ({
     >
       <div className="flex justify-between items-start mb-2">
         <div>
-          <h3 className="font-semibold text-lg text-gray-900 leading-tight">
+          <h3 className="font-semibold text-lg text-gray-900 leading-tight max-w-xs break-all">
             {task.title}
           </h3>
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full mt-1 inline-block ${statusStyle}`}>
@@ -73,8 +68,8 @@ const TaskCard = ({
           {formatVND(task.price)}
         </span>
       </div>
-      <div className="flex items-center text-sm text-gray-600 mt-2">
-        <MapPin className="w-4 h-4 mr-1.5 text-green-500" /> {truncateText(task.location)}
+      <div className="flex items-center text-sm text-gray-600 mt-2 truncate">
+        <MapPin className="w-4 h-4 mr-1.5 text-green-500" /> {task.location}
       </div>
       <div className="flex items-center text-sm text-gray-600 mt-1.5">
         <Calendar className="w-4 h-4 mr-1.5 text-green-500" /> {task.time}

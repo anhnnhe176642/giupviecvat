@@ -45,6 +45,11 @@ const TaskCard = ({
     }
   };
   
+  const truncateText = (text, maxLength = 40) => {
+    if (!text) return "";
+    return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+  };
+  
   return (
     <div
       key={task._id || index}
@@ -69,7 +74,7 @@ const TaskCard = ({
         </span>
       </div>
       <div className="flex items-center text-sm text-gray-600 mt-2">
-        <MapPin className="w-4 h-4 mr-1.5 text-green-500" /> {task.location}
+        <MapPin className="w-4 h-4 mr-1.5 text-green-500" /> {truncateText(task.location)}
       </div>
       <div className="flex items-center text-sm text-gray-600 mt-1.5">
         <Calendar className="w-4 h-4 mr-1.5 text-green-500" /> {task.time}

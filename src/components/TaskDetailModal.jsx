@@ -31,6 +31,29 @@ const formatDate = (dateString) => {
   }).format(date);
 };
 
+// Helper functions for status display
+const getStatusText = (status) => {
+  const statusMap = {
+    'open': 'Đang mở',
+    'assigned': 'Đã giao',
+    'completed': 'Hoàn thành',
+    'cancelled': 'Đã hủy',
+    'closed': 'Đã đóng'
+  };
+  return statusMap[status] || 'Đang mở';
+};
+
+const getStatusStyle = (status) => {
+  const styleMap = {
+    'open': 'bg-green-50 text-green-700',
+    'assigned': 'bg-yellow-50 text-yellow-700',
+    'completed': 'bg-blue-50 text-blue-700',
+    'cancelled': 'bg-red-50 text-red-700',
+    'closed': 'bg-gray-50 text-gray-700'
+  };
+  return styleMap[status] || 'bg-green-50 text-green-700';
+};
+
 const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
@@ -172,8 +195,8 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask }) =>
                   <span className="bg-emerald-50 text-emerald-700 text-xs px-3 py-1.5 rounded-full flex items-center font-medium shadow-sm">
                     <Clock size={12} className="mr-1.5" /> {task.time}
                   </span>
-                  <span className="bg-green-50 text-green-700 text-xs px-3 py-1.5 rounded-full font-medium shadow-sm">
-                    Đang mở
+                  <span className={`${getStatusStyle(task.status)} text-xs px-3 py-1.5 rounded-full font-medium shadow-sm`}>
+                    {getStatusText(task.status)}
                   </span>
                 </div>
               </div>

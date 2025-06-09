@@ -1,6 +1,16 @@
 import { MapPin, Calendar, Clock } from "lucide-react";
 
-const TaskCard = ({ task, index, isSelected, onClick, onViewDetails, getPosterImage, getPosterName }) => {
+const TaskCard = ({ 
+  task, 
+  index, 
+  isSelected, 
+  onClick, 
+  onViewDetails, 
+  getPosterImage, 
+  getPosterName,
+  statusText,
+  statusStyle 
+}) => {
   const formatVND = (amount) => {
     return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
   };
@@ -46,9 +56,14 @@ const TaskCard = ({ task, index, isSelected, onClick, onViewDetails, getPosterIm
       onClick={() => onClick(index)}
     >
       <div className="flex justify-between items-start mb-2">
-        <h3 className="font-semibold text-lg text-gray-900 leading-tight">
-          {task.title}
-        </h3>
+        <div>
+          <h3 className="font-semibold text-lg text-gray-900 leading-tight">
+            {task.title}
+          </h3>
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full mt-1 inline-block ${statusStyle}`}>
+            {statusText}
+          </span>
+        </div>
         <span className="text-green-600 font-bold text-lg">
           {formatVND(task.price)}
         </span>

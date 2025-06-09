@@ -19,6 +19,7 @@ function BrowseTasks() {
   const [searchTerm, setSearchTerm] = useState("");
   const [inputValue, setInputValue] = useState(""); // New state for immediate input value
   const [selectedCategory, setSelectedCategory] = useState("all"); // Changed to "all" as default
+  const [selectedStatus, setSelectedStatus] = useState("open"); 
   const [showFilters, setShowFilters] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -80,6 +81,7 @@ function BrowseTasks() {
           limit: 10,
           search: searchTerm,
           category: selectedCategory !== "all" ? selectedCategory : undefined,
+          status: selectedStatus !== "all" ? selectedStatus : undefined, // Add status parameter
           sort: sortBy,
           minPrice: minPrice > 0 ? minPrice : undefined,
           maxPrice: maxPrice < 5000000 ? maxPrice : undefined
@@ -111,7 +113,7 @@ function BrowseTasks() {
     };
 
     fetchTasks();
-  }, [searchTerm, selectedCategory, locationActive, userLocation, searchRadius, minPrice, maxPrice, sortBy]);
+  }, [searchTerm, selectedCategory, selectedStatus, locationActive, userLocation, searchRadius, minPrice, maxPrice, sortBy]); // Add selectedStatus dependency
   
   // Load more tasks when scrolling
   const loadMoreTasks = async () => {
@@ -127,6 +129,7 @@ function BrowseTasks() {
         limit: 10,
         search: searchTerm,
         category: selectedCategory !== "all" ? selectedCategory : undefined,
+        status: selectedStatus !== "all" ? selectedStatus : undefined, // Add status parameter
         sort: sortBy,
         minPrice: minPrice > 0 ? minPrice : undefined,
         maxPrice: maxPrice < 5000000 ? maxPrice : undefined
@@ -238,6 +241,7 @@ function BrowseTasks() {
           limit: 10,
           search: searchTerm,
           category: selectedCategory !== "all" ? selectedCategory : undefined,
+          status: selectedStatus !== "all" ? selectedStatus : undefined, // Add status parameter
           sort: sortBy,
           minPrice: minPrice > 0 ? minPrice : undefined,
           maxPrice: maxPrice < 5000000 ? maxPrice : undefined
@@ -453,6 +457,8 @@ function BrowseTasks() {
             setMaxPrice={setMaxPrice}
             sortBy={sortBy}
             setSortBy={setSortBy}
+            selectedStatus={selectedStatus} // Pass selectedStatus to TaskFilters
+            setSelectedStatus={setSelectedStatus} // Pass setSelectedStatus to TaskFilters
           />
         </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Sliders, ArrowDownAZ, FileText, Ruler } from 'lucide-react';
+import { MapPin, Sliders, ArrowDownAZ, FileText, Ruler, Tag } from 'lucide-react';
 import { Range, getTrackBackground } from 'react-range';
 import { getCategoryIconElement } from '../../utils/categoryHelpers';
 
@@ -18,10 +18,12 @@ function TaskFilters({
   maxPrice,
   setMaxPrice,
   sortBy,
-  setSortBy
+  setSortBy,
+  selectedStatus,
+  setSelectedStatus
 }) {
   // Track active filter screen
-  const [activeFilterScreen, setActiveFilterScreen] = useState('category'); // 'category', 'distance', 'sort_price'
+  const [activeFilterScreen, setActiveFilterScreen] = useState('category'); // 'category', 'distance', 'sort_price', 'status'
   
   // Temporary price states for immediate UI feedback
   const [tempMinPrice, setTempMinPrice] = useState(minPrice);
@@ -40,6 +42,16 @@ function TaskFilters({
     setTempMaxPrice(maxPrice);
     setTempSearchRadius(searchRadius);
   }, [minPrice, maxPrice, searchRadius]);
+
+  // Status options with corresponding styles
+  const statusOptions = [
+    { value: 'all', label: 'Tất cả', style: 'bg-gray-100 text-gray-800' },
+    { value: 'open', label: 'Mở', style: 'bg-blue-100 text-blue-800' },
+    { value: 'assigned', label: 'Đã giao', style: 'bg-yellow-100 text-yellow-800' },
+    { value: 'completed', label: 'Hoàn thành', style: 'bg-green-100 text-green-800' },
+    { value: 'cancelled', label: 'Đã hủy', style: 'bg-red-100 text-red-800' },
+    { value: 'closed', label: 'Đã đóng', style: 'bg-gray-100 text-gray-800' }
+  ];
 
   return (
     <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
@@ -69,7 +81,7 @@ function TaskFilters({
           <h3 className="font-semibold text-gray-800 mb-3">Bộ lọc</h3>
           
           {/* Filter navigation tabs */}
-          <div className="flex border-b border-gray-200 mb-4">
+          <div className="flex border-b border-gray-200 mb-4 flex-wrap">
             <button 
               className={`flex-1 pb-2 text-xs font-medium text-center ${
                 activeFilterScreen === 'category' 
@@ -90,7 +102,18 @@ function TaskFilters({
               onClick={() => setActiveFilterScreen('distance')}
             >
               <Ruler size={16} className="mx-auto mb-1" />
-              Khoảng cách
+              Km
+            </button>
+            <button 
+              className={`flex-1 pb-2 text-xs font-medium text-center ${
+                activeFilterScreen === 'status' 
+                  ? 'border-b-2 border-green-500 text-green-600' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+              onClick={() => setActiveFilterScreen('status')}
+            >
+              <Tag size={16} className="mx-auto mb-1" />
+              Trạng thái
             </button>
             <button 
               className={`flex-1 pb-2 text-xs font-medium text-center ${
@@ -170,6 +193,30 @@ function TaskFilters({
                   Bạn cần bật định vị để sử dụng tính năng này
                 </div>
               )}
+            </div>
+          )}
+          
+          {/* Status filter screen */}
+          {activeFilterScreen === 'status' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Trạng thái công việc
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {statusOptions.map((status) => (
+                  <button
+                    key={status.value}
+                    onClick={() => setSelectedStatus(status.value)}
+                    className={`flex items-center justify-center gap-2 p-2 rounded-lg text-sm transition-all ${
+                      selectedStatus === status.value
+                        ? `${status.style} border border-gray-300 font-medium`
+                        : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'
+                    }`}
+                  >
+                    {status.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
           

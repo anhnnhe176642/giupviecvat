@@ -11,7 +11,7 @@ const TaskOffersModal = ({ task, onClose }) => {
     };
   }, []);
 
-  if (!task || !task.offersList) return null;
+  if (!task) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/5 backdrop-blur-sm"
@@ -20,7 +20,11 @@ const TaskOffersModal = ({ task, onClose }) => {
            onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex justify-between items-center border-b p-4 bg-gradient-to-r from-blue-50 to-white">
-          <h2 className="text-xl font-bold text-blue-800">{task.offers} đề nghị cho "{task.title}"</h2>
+          <h2 className="text-xl font-bold text-blue-800">
+            {task.offers && task.offers.length > 0 ? 
+              `${task.offers.length} đề nghị cho "${task.title}"` : 
+              `Đề nghị cho "${task.title}"`}
+          </h2>
           <button 
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 bg-white rounded-full p-1 hover:bg-gray-100 transition-colors"
@@ -31,61 +35,59 @@ const TaskOffersModal = ({ task, onClose }) => {
         
         {/* Offers List */}
         <div className="overflow-y-auto flex-grow">
-          {task.offersList.map(offer => (
-            <div key={offer.id} className="border-b border-gray-200 p-6 hover:bg-gray-50">
-              <div className="flex items-start">
-                {/* User Avatar and Info */}
-                <div className="flex-shrink-0 mr-4">
-                  <img 
-                    src={offer.avatar} 
-                    alt={offer.name} 
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                </div>
-                
-                <div className="flex-grow">
-                  {/* User Details */}
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="font-semibold text-lg">{offer.name}</h3>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <div className="flex items-center mr-3">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                          {offer.rating}
-                        </div>
-                        <div>
-                          {offer.completedTasks} công việc đã hoàn thành
+          {!task.offers || task.offers.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-gray-500 text-lg">Chưa có đề nghị nào cho công việc này</p>
+              <p className="text-gray-400 mt-2">Các đề nghị sẽ xuất hiện ở đây khi ai đó quan tâm đến công việc của bạn</p>
+            </div>
+          ) : (
+            task.offers.map(offer => (
+              <div key={offer.conversationId} className="border-b border-gray-200 p-6 hover:bg-gray-50">
+                <div className="flex items-start">
+                  {/* User Avatar and Info */}
+                  <div className="flex-shrink-0 mr-4">
+                    <img 
+                      src={offer.sender.profilePicture} 
+                      alt={offer.sender.name} 
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                  </div>
+                  
+                  <div className="flex-grow">
+                    {/* User Details */}
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="font-semibold text-lg">{offer.sender.name}</h3>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <div className="text-gray-500">
+                            Ngày: {new Date(offer.createdAt).toLocaleDateString('vi-VN')}
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-lg text-blue-600">{offer.price}</div>
+                    
+                    {/* Last Message */}
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+                      <p className="text-gray-700">{offer.lastMessage || "Chưa có tin nhắn"}</p>
                     </div>
-                  </div>
-                  
-                  {/* Greeting Message */}
-                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
-                    <p className="text-gray-700">{offer.greeting}</p>
-                  </div>
-                  
-                  {/* Action Buttons */}
-                  <div className="flex justify-end gap-3">
-                    <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                      Xem hồ sơ
-                    </button>
-                    <button
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-                      onClick={() => window.location.href = '/chat'}
-                    >
-                      Liên hệ
-                    </button>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex justify-end gap-3">
+                      <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        Xem hồ sơ
+                      </button>
+                      <button
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                        onClick={() => window.location.href = `/chat/conversation/${offer.conversationId}`}
+                      >
+                        Liên hệ
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Footer */}

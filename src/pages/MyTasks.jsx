@@ -56,6 +56,7 @@ const MyTasks = () => {
         params: {
           poster: user._id,
           status: status,
+          offers: true, 
           page: page,
           limit: pagination.limit
         }
@@ -116,14 +117,14 @@ const MyTasks = () => {
     // Here you would typically send this data to your API
   };
 
-  // if (!user) {
-  //   return (
-  //     <div className="container mx-auto px-4 py-8 text-center">
-  //       <h2 className="text-2xl font-bold mb-4">Vui lòng đăng nhập để xem công việc của bạn</h2>
-  //       <p>Bạn cần đăng nhập để xem và quản lý các công việc của mình.</p>
-  //     </div>
-  //   );
-  // }
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h2 className="text-2xl font-bold mb-4">Vui lòng đăng nhập để xem công việc của bạn</h2>
+        <p>Bạn cần đăng nhập để xem và quản lý các công việc của mình.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

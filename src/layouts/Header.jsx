@@ -111,7 +111,7 @@ function Header() {
           ) : (
             <div className="hidden md:flex space-x-4 items-center">
               <Link to="/login" className="text-gray-600 hover:text-blue-600">Đăng nhập</Link>
-              <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700">Đăng ký Tasker</Link>
+              <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700">Đăng ký</Link>
             </div>
           )}
           

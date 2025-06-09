@@ -1,7 +1,8 @@
-import { useSelector } from 'react-redux';
+import { useContext } from 'react';
+import { AuthContext } from '../conext/AuthConext';
 
 function Dashboard() {
-  const { user } = useSelector(state => state.auth);
+  const { user } = useContext(AuthContext)
 
   return (
     <div className="container mx-auto p-4">

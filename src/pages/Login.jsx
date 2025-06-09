@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { useContext } from "react";
-import { AuthContext } from "../conext/AuthConext";
+import { AuthContext } from "../conext/AuthContext";
 import toast from "react-hot-toast";
 
 function Login() {

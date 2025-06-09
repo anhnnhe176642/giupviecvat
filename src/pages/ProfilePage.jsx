@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { FaUser, FaEdit, FaEye, FaEyeSlash, FaCheck, FaTimes } from 'react-icons/fa';
-import { AuthContext } from '../conext/AuthConext';
+import { AuthContext } from '../conext/AuthContext';
 import axios from 'axios';
 
 const ProfilePage = () => {

@@ -1,6 +1,6 @@
 import { useContext, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../conext/AuthConext';
+import { AuthContext } from '../conext/AuthContext';
 
 function Header() {
   const navigate = useNavigate();

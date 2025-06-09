@@ -9,7 +9,7 @@ import ProfilePage from "./pages/ProfilePage";
 import MyTasks from "./pages/MyTasks";
 import { Toaster } from "react-hot-toast";
 import { useContext } from "react";
-import { AuthContext } from "./conext/AuthConext"
+import { AuthContext } from "./conext/AuthContext"
 import NotFound from "./pages/NotFound";
 
 function App() {

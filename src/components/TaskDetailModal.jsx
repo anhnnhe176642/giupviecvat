@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { X, MapPin, Calendar, Clock, Star, Award, Edit, Trash2, Loader, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../conext/AuthConext";
+import { AuthContext } from "../conext/AuthContext";
 import EditTaskModal from "./tasks/EditTaskModal";
 import toast from "react-hot-toast";
 import { confirmAlert } from 'react-confirm-alert';

@@ -1,4 +1,4 @@
-import { AuthContext } from "./AuthConext";
+import { AuthContext } from "./AuthContext";
 import { ChatContext } from "./ChatConext";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";

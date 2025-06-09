@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import TaskOffersModal from '../components/TaskOffersModal';
 import RatingModal from '../components/RatingModal';
-import { AuthContext } from '../conext/AuthConext';
+import { AuthContext } from '../conext/AuthContext';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 

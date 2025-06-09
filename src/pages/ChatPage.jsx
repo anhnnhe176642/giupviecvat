@@ -15,7 +15,7 @@ import JobForm from "../components/chat/JobForm"; // Add JobForm import
 import Header from "../layouts/Header";
 import { useContext } from "react";
 import { ChatContext } from "../conext/ChatConext";
-import { AuthContext } from "../conext/AuthConext";
+import { AuthContext } from "../conext/AuthContext";
 import { useEffect } from "react";
 import { useRef } from "react";
 

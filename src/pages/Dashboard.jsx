@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { AuthContext } from '../conext/AuthConext';
+import { AuthContext } from '../conext/AuthContext';
 
 function Dashboard() {
   const { user } = useContext(AuthContext)

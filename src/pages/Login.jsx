@@ -12,9 +12,9 @@ function Login() {
   const { login, googleLogin } = useContext(AuthContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
-    login({ email, password }).then(() => {
-      navigate("/dashboard");
-    });
+    if (await login({ email, password })) {
+      navigate("/");
+    }
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { useContext } from "react";
 import { AuthContext } from "../conext/AuthContext";
+import {Link} from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
 
@@ -61,15 +62,15 @@ function Register() {
       <div className="max-w-screen-xl max-h-full m-0 sm:m-5 bg-white shadow sm:rounded-lg flex justify-center flex-1">
         <div className="lg:w-1/2 xl:w-5/12 p-4 sm:p-6 overflow-y-auto">
           <div className="flex justify-center">
-            <a href="/" className="w-32 mx-auto">
+            <Link to="/" className="w-32 mx-auto">
               <p className="text-2xl font-bold text-center text-blue-600">
                 <img
-                  src="/giupviecvatlogo.png"
+                  src={`${import.meta.env.BASE_URL}/giupviecvatlogo.png`}
                   className="h-25 w-auto mx-auto"
                   alt="Giupviecvat"
                 />
               </p>
-            </a>
+            </Link>
           </div>
           <div className="mt-6 flex flex-col items-center">
             <h1 className="text-2xl xl:text-3xl font-extrabold">Đăng ký tài khoản</h1>

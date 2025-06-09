@@ -151,12 +151,12 @@ function Register() {
                 </button>
                 <p className="mt-4 text-xs text-gray-600 text-center">
                   Bạn đã có tài khoản?{" "}
-                  <a
-                    href="/login"
+                  <Link
+                    to="/login"
                     className="border-b border-gray-500 border-dotted hover:text-indigo-600 transition-colors"
                   >
                     Đăng nhập
-                  </a>
+                  </Link>
                 </p>
               </form>
             </div>

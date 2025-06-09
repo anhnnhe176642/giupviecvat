@@ -333,62 +333,63 @@ const ChatPage = () => {
                 isMobileMenuOpen ? "block" : "hidden"
               } md:block overflow-y-auto`}
             >
-              {/* Current Task Details */}
-              {currentConversation && currentConversation.postTask && (
-                <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-100">
-                  <h3 className="font-medium text-sm text-gray-700 mb-2 flex items-center">
-                    <svg className="w-4 h-4 mr-1 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                    Thông tin công việc
-                  </h3>
-                  <div className="space-y-2 text-xs">
-                    <p className="flex items-center justify-between">
-                      <span className="font-semibold text-gray-600">Tiêu đề:</span> 
-                      <span className="text-gray-800 font-medium">{currentConversation.postTask.title || "Không có tiêu đề"}</span>
-                    </p>
-                    <p className="flex items-center justify-between">
-                      <span className="font-semibold text-gray-600">Ngân sách:</span> 
-                      <span className="text-gray-800 font-medium">{currentConversation.postTask.price ? `${currentConversation.postTask.price.toLocaleString()}đ` : "Chưa có giá"}</span>
-                    </p>
-                    <p className="flex items-center justify-between">
-                      <span className="font-semibold text-gray-600">Địa điểm:</span> 
-                      <span className="text-gray-800 font-medium">{currentConversation.postTask.location || "Không có địa điểm"}</span>
-                    </p>
-                    <p className="flex items-center justify-between">
-                      <span className="font-semibold text-gray-600">Trạng thái:</span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        currentConversation.postTask.status === 'open' ? 'bg-blue-100 text-blue-800' :
-                        currentConversation.postTask.status === 'assigned' ? 'bg-yellow-100 text-yellow-800' :
-                        currentConversation.postTask.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        currentConversation.postTask.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                        currentConversation.postTask.status === 'closed' ? 'bg-gray-100 text-gray-800' :
-                        'bg-purple-100 text-purple-800'
-                      }`}>
-                        {currentConversation.postTask.status === 'open' ? 'Đang mở' :
-                         currentConversation.postTask.status === 'assigned' ? 'Đã giao' :
-                         currentConversation.postTask.status === 'completed' ? 'Hoàn thành' :
-                         currentConversation.postTask.status === 'cancelled' ? 'Đã huỷ' :
-                         currentConversation.postTask.status === 'closed' ? 'Đã đóng' : 
-                         'Đang xử lý'}
-                      </span>
-                    </p>
-                    <p className="flex items-center justify-between border-t border-gray-100 pt-1 mt-1">
-                      <span className="font-semibold text-gray-600">Người đăng:</span>
-                      <span className={`flex items-center ${currentConversation.postTask.poster === user?._id ? 'text-indigo-600 font-medium' : 'text-gray-700'}`}>
-                        {currentConversation.postTask.poster === user?._id ? (
-                          <>
-                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path>
-                            </svg>
-                            Bạn
-                          </>
-                        ) : currentConversation.participants?.find(participant => participant._id !== user?._id)?.name || 'Người khác'}
-                      </span>
-                    </p>
-                  </div>
+              {/* Current Task Details - Always show panel */}
+              <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+                <h3 className="font-medium text-sm text-gray-700 mb-2 flex items-center">
+                  <svg className="w-4 h-4 mr-1 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                  </svg>
+                  Thông tin công việc
+                </h3>
+                <div className="space-y-2 text-xs">
+                  <p className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-600">Tiêu đề:</span> 
+                    <span className="text-gray-800 font-medium max-w-35 truncate">{currentConversation?.postTask?.title || "Không có tiêu đề"}</span>
+                  </p>
+                  <p className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-600">Ngân sách:</span> 
+                    <span className="text-gray-800 font-medium">{currentConversation?.postTask?.price ? `${currentConversation.postTask.price.toLocaleString()}đ` : "Chưa có giá"}</span>
+                  </p>
+                  <p className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-600">Địa điểm:</span> 
+                    <span className="text-gray-800 font-medium max-w-35 truncate">{currentConversation?.postTask?.location || "Không có địa điểm"}</span>
+                  </p>
+                  <p className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-600">Trạng thái:</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      !currentConversation?.postTask ? 'bg-gray-100 text-gray-800' :
+                      currentConversation.postTask.status === 'open' ? 'bg-blue-100 text-blue-800' :
+                      currentConversation.postTask.status === 'assigned' ? 'bg-yellow-100 text-yellow-800' :
+                      currentConversation.postTask.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      currentConversation.postTask.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                      currentConversation.postTask.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+                      'bg-purple-100 text-purple-800'
+                    }`}>
+                      {!currentConversation?.postTask ? 'Không có thông tin' :
+                       currentConversation.postTask.status === 'open' ? 'Đang mở' :
+                       currentConversation.postTask.status === 'assigned' ? 'Đã giao' :
+                       currentConversation.postTask.status === 'completed' ? 'Hoàn thành' :
+                       currentConversation.postTask.status === 'cancelled' ? 'Đã huỷ' :
+                       currentConversation.postTask.status === 'closed' ? 'Đã đóng' : 
+                       'Đang xử lý'}
+                    </span>
+                  </p>
+                  <p className="flex items-center justify-between border-t border-gray-100 pt-1 mt-1">
+                    <span className="font-semibold text-gray-600">Người đăng:</span>
+                    <span className={`flex items-center ${currentConversation?.postTask?.poster === user?._id ? 'text-indigo-600 font-medium' : 'text-gray-700'}`}>
+                      {!currentConversation?.postTask ? 'Không xác định' :
+                       currentConversation.postTask.poster === user?._id ? (
+                        <>
+                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path>
+                          </svg>
+                          Bạn
+                        </>
+                      ) : currentConversation.participants?.find(participant => participant._id !== user?._id)?.name || 'Người khác'}
+                    </span>
+                  </p>
                 </div>
-              )}
+              </div>
               
               
 
@@ -424,7 +425,7 @@ const ChatPage = () => {
                     </svg>}
                       </div>
                       <div className="flex-1 ml-2">
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center max-w-40 truncate">
                           <span className={`text-sm font-semibold ${unseenMessages[conversation._id] > 0 ? 'font-bold text-black' : 'font-medium text-gray-700'}`}>
                             {conversation.postTask.title || "Unknown"}
                           </span>

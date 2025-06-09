@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import TaskOffersModal from '../components/TaskOffersModal';
 import RatingModal from '../components/RatingModal';
 import { AuthContext } from '../conext/AuthConext';
+import toast from 'react-hot-toast';
 import axios from 'axios';
 
 const MyTasks = () => {
@@ -115,6 +116,27 @@ const MyTasks = () => {
   const handleRatingSubmit = (ratingData) => {
     console.log('Rating submitted:', ratingData);
     // Here you would typically send this data to your API
+  };
+
+  const handleCompleteTask = async (taskId) => {
+    try {
+      const response = await axios.patch(`/tasks/${taskId}/status`, { 
+        status: 'completed' 
+      });
+      
+      if (response.data.success) {
+        // Refresh the tasks to show the updated status
+        fetchTasks(pagination.current);
+        
+        // Show success message (optional)
+        toast('Công việc đã được đánh dấu hoàn thành!');
+      } else {
+        toast('Không thể cập nhật trạng thái công việc. Vui lòng thử lại!');
+      }
+    } catch (err) {
+      console.error('Error updating task status:', err);
+      toast('Đã xảy ra lỗi khi cập nhật trạng thái công việc.');
+    }
   };
 
   if (!user) {
@@ -272,7 +294,9 @@ const MyTasks = () => {
                             Hạn: {task.deadline ? new Date(task.deadline).toLocaleDateString('vi-VN') : 'Không có'}
                           </div>
                         </div>
-                        <button className="bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 transition-colors duration-150 text-sm font-medium shadow-sm flex items-center justify-center">
+                        <button 
+                          onClick={() => handleCompleteTask(task._id)}
+                          className="bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 transition-colors duration-150 text-sm font-medium shadow-sm flex items-center justify-center">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>

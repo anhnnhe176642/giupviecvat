@@ -116,8 +116,6 @@ export const ChatProvider = ({ children }) => {
     
     // Add new listener for all messages
     socket.on("newMessage", (newMessageData) => {
-      console.log("Received new message:", newMessageData);
-      
       try {
         // Convert IDs to strings for reliable comparison
         const msgConversationId = newMessageData.conversation?.toString();

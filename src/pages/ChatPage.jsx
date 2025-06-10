@@ -31,6 +31,7 @@ const ChatPage = () => {
     loadMoreMessages,
     hasMore,
     isLoadingConversations,
+    setConversations,
     isLoadingMore,
     sendMessage,
   } = useContext(ChatContext);
@@ -63,6 +64,12 @@ const ChatPage = () => {
     // Initial fetch
     getConversations();
   }, []);
+
+  useEffect(() => {
+    setCurrentConversation(null);
+    setMessages([]);
+    setConversations([]);
+  }, [user]);
 
   const navigate = useNavigate();
   const params = useParams();

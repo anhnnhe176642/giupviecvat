@@ -65,7 +65,7 @@ function Register() {
             <Link to="/" className="w-32 mx-auto">
               <p className="text-2xl font-bold text-center text-blue-600">
                 <img
-                  src={`${import.meta.env.BASE_URL}/giupviecvatlogo.png`}
+                  src={`${import.meta.env.BASE_URL}giupviecvatlogo.png`}
                   className="h-25 w-auto mx-auto"
                   alt="Giupviecvat"
                 />

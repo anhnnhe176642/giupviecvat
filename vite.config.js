@@ -8,5 +8,5 @@ export default defineConfig({
   build: {
     outDir: 'dist'
   },
-  base: '/giupviecvat',
+  base: '/giupviecvat/',
 })

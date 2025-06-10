@@ -40,7 +40,7 @@ function Header() {
     <nav className="bg-white shadow-sm py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex items-center">
-          <Link to="/" className="text-2xl font-bold text-blue-600">
+          <Link to="/" className="text-2xl font-bold text-green-600">
             <img
               src={`${import.meta.env.BASE_URL}giupviecvatlogo.png`}
               className="h-10 w-auto" 

@@ -12,11 +12,12 @@ import { useContext } from "react";
 import { AuthContext } from "./conext/AuthContext"
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
+import LoadingScreen from "./components/LoadingScreen";
 
 function App() {
   const {user, isLoading} = useContext(AuthContext);
   if (isLoading) {
-    return null;
+    return <LoadingScreen />;
   }
   return (
       <>

@@ -1,5 +1,5 @@
 import { AuthContext } from "./AuthContext";
-import { ChatContext } from "./ChatConext";
+import { ChatContext } from "./ChatContext";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -7,6 +7,7 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [conversations, setConversations] = useState([]);
+  const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [unseenMessages, setUnseenMessages] = useState({});
   
   // Pagination states
@@ -14,10 +15,11 @@ export const ChatProvider = ({ children }) => {
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const { socket, axios, user } = useContext(AuthContext);
+  const { socket, axios } = useContext(AuthContext);
 
   const getConversations = async () => {
     try {
+      setIsLoadingConversations(true);
       const response = await axios.get("/conversations");
       if (response.data.success) {
         setConversations(response.data.conversations);
@@ -26,7 +28,9 @@ export const ChatProvider = ({ children }) => {
         toast.error(response.data.message || "Failed to fetch conversations.");
         console.error("Failed to fetch conversations:", response.data.message);
       }
+      setIsLoadingConversations(false);
     } catch (error) {
+      setIsLoadingConversations(false);
       toast.error("An error occurred while fetching conversations.");
       console.error("Error fetching conversations:", error);
     }
@@ -220,9 +224,6 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Replace subscribeToConversation with our new function
-  const subscribeToConversation = subscribeToNewMessages;
-
   useEffect(() => {
     if (socket) {
       subscribeToNewMessages();
@@ -259,10 +260,10 @@ export const ChatProvider = ({ children }) => {
     setConversations,
     unseenMessages,
     setUnseenMessages,
+    isLoadingConversations,
     getConversations,
     getMessages,
     sendMessage,
-    subscribeToConversation,
     unsubscribeFromConversation,
     loadMoreMessages,
     hasMore,

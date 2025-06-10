@@ -14,7 +14,7 @@ import ChatInput from "../components/chat/ChatInput";
 import JobForm from "../components/chat/JobForm"; // Add JobForm import
 import Header from "../layouts/Header";
 import { useContext } from "react";
-import { ChatContext } from "../conext/ChatConext";
+import { ChatContext } from "../conext/ChatContext";
 import { AuthContext } from "../conext/AuthContext";
 import { useEffect } from "react";
 import { useRef } from "react";
@@ -30,6 +30,7 @@ const ChatPage = () => {
     setMessages,
     loadMoreMessages,
     hasMore,
+    isLoadingConversations,
     isLoadingMore,
     sendMessage,
   } = useContext(ChatContext);
@@ -394,7 +395,16 @@ const ChatPage = () => {
               
 
               {/* Active Conversations */}
-              <div className="flex flex-col mt-8">
+              {isLoadingConversations && conversations?.length == 0 ? (
+                <div className="flex flex-col mt-8">
+                  <div className="flex flex-row items-center justify-between text-xs">
+                    <span className="font-bold">Đang tải cuộc trò chuyện...</span>
+                  </div>
+                  <div className="flex justify-center items-center h-72 mt-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                  </div>
+                </div>
+              ) :(conversations) ? <div className="flex flex-col mt-8">
                 <div className="flex flex-row items-center justify-between text-xs">
                   <span className="font-bold">Cuộc trò chuyện hoạt động</span>
                   <span className="flex items-center justify-center bg-gray-300 h-4 w-4 rounded-full">
@@ -454,7 +464,11 @@ const ChatPage = () => {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> : (
+                <div className="flex items-center justify-center h-72">
+                  <p className="text-gray-500">Không có cuộc trò chuyện nào</p>
+                </div>
+              )}
             </div>
 
             {/* Chat Area */}

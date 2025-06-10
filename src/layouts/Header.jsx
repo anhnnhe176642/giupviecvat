@@ -48,11 +48,10 @@ function Header() {
             />
           </Link>
           <div className="hidden md:flex ml-10 space-x-6">
-            <Link to="/" className="text-gray-600 hover:text-blue-600">Danh mục</Link>
             <Link to="/browse-tasks" className="text-gray-600 hover:text-blue-600">Tìm công việc</Link>
             <Link to="/my-tasks" className="text-gray-600 hover:text-blue-600">Công việc của tôi</Link>
-            <Link to="/" className="text-gray-600 hover:text-blue-600">Đánh giá</Link>
             <Link to="/chat" className="text-gray-600 hover:text-blue-600">Tin nhắn</Link>
+            <Link to="/" className="text-gray-600 hover:text-blue-600">Đánh giá</Link>
             {user && (
               <Link to="/dashboard" className="text-gray-600 hover:text-blue-600">Bảng điều khiển</Link>
             )}

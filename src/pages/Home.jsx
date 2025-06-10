@@ -108,9 +108,9 @@ function Home() {
               
               <button 
                 className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg hover:bg-white/10 transition-all duration-300 font-bold text-lg w-full md:w-auto"
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/browse-tasks')}
               >
-                Tìm hiểu thêm
+                Tìm công việc
               </button>
             </div>
           </div>

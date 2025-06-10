@@ -54,7 +54,16 @@ function TaskFilters({
   ];
 
   return (
-    <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+    <div className="absolute top-4 right-4 z-10 flex gap-3">
+      {/* Location button */}
+      <button
+        onClick={toggleLocation}
+        className={`p-2 rounded-full shadow-md w-10 h-10 flex items-center justify-center ${
+          locationActive ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'
+        }`}
+      >
+        <MapPin size={20} />
+      </button>
       {/* Filter button */}
       <button
         onClick={() => setShowFilters(!showFilters)}
@@ -65,19 +74,9 @@ function TaskFilters({
         <Sliders size={20} />
       </button>
 
-      {/* Location button */}
-      <button
-        onClick={toggleLocation}
-        className={`p-2 rounded-full shadow-md w-10 h-10 flex items-center justify-center ${
-          locationActive ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'
-        }`}
-      >
-        <MapPin size={20} />
-      </button>
-
       {/* Filter panel */}
       {showFilters && (
-        <div className="mt-5 absolute top-20 right-0 bg-white rounded-lg shadow-lg p-4 w-64 animate-fade-in">
+        <div className="mt-5 absolute top-10 right-0 bg-white rounded-lg shadow-lg p-4 w-64 animate-fade-in">
           <h3 className="font-semibold text-gray-800 mb-3">Bộ lọc</h3>
           
           {/* Filter navigation tabs */}

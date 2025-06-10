@@ -5,14 +5,8 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: {
-    historyApiFallback: {
-      index: '/giupviecvat/index.html'
-    },
-    open: true
-  },
   build: {
     outDir: 'dist'
   },
-  base: '/giupviecvat'
+  base: '/'
 })

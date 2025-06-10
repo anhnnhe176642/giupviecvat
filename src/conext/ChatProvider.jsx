@@ -151,7 +151,6 @@ export const ChatProvider = ({ children }) => {
 
     // Add listener for job status updates
     socket.on("jobStatusUpdate", (data) => {
-      console.log("Received job status update:", data);
       const { jobId, status, conversationId, message } = data;
 
       // Show notification about the status change

@@ -271,8 +271,6 @@ function BrowseTasks() {
 
   const handleEditTask = async (updatedTask) => {
     try {
-      // Show loading indicator or disable submit button (would be implemented in a real app)
-      console.log("Updating task:", updatedTask);
       // Send updated data to backend API
       const response = await axios.put(`/tasks/${updatedTask._id}`, updatedTask);
       
@@ -328,7 +326,6 @@ function BrowseTasks() {
   };
 
   const getPosterImage = (task) => {
-    console.log("Task poster:", task.poster);
     return task.poster && task.poster.profilePicture 
       ? task.poster.profilePicture 
       : "https://cdn-icons-png.flaticon.com/512/10337/10337609.png"; // Fallback image

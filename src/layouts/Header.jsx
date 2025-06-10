@@ -48,12 +48,12 @@ function Header() {
             />
           </Link>
           <div className="hidden md:flex ml-10 space-x-6">
-            <Link to="/browse-tasks" className="text-gray-600 hover:text-blue-600">Tìm công việc</Link>
-            <Link to="/my-tasks" className="text-gray-600 hover:text-blue-600">Công việc của tôi</Link>
-            <Link to="/chat" className="text-gray-600 hover:text-blue-600">Tin nhắn</Link>
-            <Link to="/" className="text-gray-600 hover:text-blue-600">Đánh giá</Link>
+            <Link to="/browse-tasks" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Tìm công việc</Link>
+            <Link to="/my-tasks" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Công việc của tôi</Link>
+            <Link to="/chat" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Tin nhắn</Link>
+            <Link to="/" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Đánh giá</Link>
             {user && (
-              <Link to="/dashboard" className="text-gray-600 hover:text-blue-600">Bảng điều khiển</Link>
+              <Link to="/dashboard" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Bảng điều khiển</Link>
             )}
           </div>
         </div>
@@ -67,11 +67,11 @@ function Header() {
                 <img
                   src={user.profilePicture || "https://cdn-icons-png.flaticon.com/512/10337/10337609.png"}
                   alt="Profile"
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="w-8 h-8 rounded-full object-cover border-2 border-green-500"
                 />
-                <span className="text-gray-700">{user.name || "User"}</span>
+                <span className="text-green-600 font-medium">{user.name || "User"}</span>
                 <svg 
-                  className={`h-4 w-4 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} 
+                  className={`h-4 w-4 transition-transform text-green-600 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
                   viewBox="0 0 24 24" 
                   stroke="currentColor"
@@ -81,25 +81,25 @@ function Header() {
               </button>
               
               {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border border-green-100">
                   <div className="py-1">
                     <Link 
                       to="/profile" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-green-700 hover:bg-green-50 transition-colors duration-200"
                       onClick={() => setIsProfileDropdownOpen(false)}
                     >
                       Hồ sơ cá nhân
                     </Link>
                     <Link 
                       to="/dashboard" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-green-700 hover:bg-green-50 transition-colors duration-200"
                       onClick={() => setIsProfileDropdownOpen(false)}
                     >
                       Quản lí công việc
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 transition-colors duration-200"
                     >
                       Đăng xuất
                     </button>
@@ -109,15 +109,15 @@ function Header() {
             </div>
           ) : (
             <div className="hidden md:flex space-x-4 items-center">
-              <Link to="/login" className="text-gray-600 hover:text-blue-600">Đăng nhập</Link>
-              <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700">Đăng ký</Link>
+              <Link to="/login" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200">Đăng nhập</Link>
+              <Link to="/register" className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition-colors duration-200">Đăng ký</Link>
             </div>
           )}
           
           {/* Mobile menu button */}
           <button 
             onClick={toggleMobileMenu}
-            className="md:hidden text-gray-600 focus:outline-none"
+            className="md:hidden text-green-600 focus:outline-none"
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {isMobileMenuOpen ? (
@@ -134,13 +134,13 @@ function Header() {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white py-2 px-4 shadow-md absolute top-16 left-0 right-0 z-50">
           <div className="flex flex-col space-y-3">
-            <Link to="/" className="text-gray-600 hover:text-blue-600 py-2">Danh mục</Link>
-            <Link to="/browse-tasks" className="text-gray-600 hover:text-blue-600 py-2">Tìm công việc</Link>
-            <Link to="/my-tasks" className="text-gray-600 hover:text-blue-600 py-2">Công việc của tôi</Link>
-            <Link to="/" className="text-gray-600 hover:text-blue-600 py-2">Đánh giá</Link>
-            <Link to="/chat" className="text-gray-600 hover:text-blue-600 py-2">Tin nhắn</Link>
+            <Link to="/" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Danh mục</Link>
+            <Link to="/browse-tasks" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Tìm công việc</Link>
+            <Link to="/my-tasks" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Công việc của tôi</Link>
+            <Link to="/" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Đánh giá</Link>
+            <Link to="/chat" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Tin nhắn</Link>
             {user && (
-              <Link to="/dashboard" className="text-gray-600 hover:text-blue-600 py-2">Bảng điều khiển</Link>
+              <Link to="/dashboard" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Bảng điều khiển</Link>
             )}
             
             {user ? (
@@ -149,18 +149,18 @@ function Header() {
                   <img
                     src={user.profilePicture || "https://via.placeholder.com/40"}
                     alt="Profile"
-                    className="w-8 h-8 rounded-full object-cover"
+                    className="w-8 h-8 rounded-full object-cover border-2 border-green-500"
                   />
-                  <span className="text-gray-700">{user.name || "User"}</span>
+                  <span className="text-green-600 font-medium">{user.name || "User"}</span>
                 </div>
-                <Link to="/profile" className="text-gray-600 hover:text-blue-600 py-2 pl-10">Hồ sơ cá nhân</Link>
-                <Link to="/dashboard" className="text-gray-600 hover:text-blue-600 py-2 pl-10">Quản lí công việc</Link>
-                <button onClick={handleLogout} className="text-gray-600 hover:text-blue-600 py-2 text-left pl-10">Đăng xuất</button>
+                <Link to="/profile" className="text-green-600 hover:text-green-800 py-2 pl-10 transition-colors duration-200">Hồ sơ cá nhân</Link>
+                <Link to="/dashboard" className="text-green-600 hover:text-green-800 py-2 pl-10 transition-colors duration-200">Quản lí công việc</Link>
+                <button onClick={handleLogout} className="text-green-600 hover:text-green-800 py-2 text-left pl-10 transition-colors duration-200">Đăng xuất</button>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-gray-600 hover:text-blue-600 py-2">Đăng nhập</Link>
-                <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 inline-block text-center">Đăng ký Tasker</Link>
+                <Link to="/login" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Đăng nhập</Link>
+                <Link to="/register" className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 inline-block text-center transition-colors duration-200">Đăng ký Tasker</Link>
               </>
             )}
           </div>

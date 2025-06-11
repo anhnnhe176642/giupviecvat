@@ -5,7 +5,7 @@ function Footer() {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <h4 className="text-xl font-bold mb-4">GiupViecVat</h4>
-            <p className="text-gray-300">Giải pháp quản lý công việc của bạn trên đám mây.</p>
+            <p className="text-gray-300">Giải pháp tìm kiếm những người giúp việc đáng tin cậy.</p>
           </div>
           <div>
             <h5 className="font-semibold mb-3">Giới thiệu</h5>

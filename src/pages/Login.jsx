@@ -8,19 +8,34 @@ import toast from "react-hot-toast";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login, googleLogin } = useContext(AuthContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (await login({ email, password })) {
-      navigate("/");
+    setLoading(true);
+    try {
+      if (await login({ email, password })) {
+        navigate("/");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    googleLogin(credentialResponse).then(() => {
-      navigate("/");
-    });
+    setLoading(true);
+    googleLogin(credentialResponse)
+      .then(() => {
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error("Google login error:", error);
+        toast.error("Đăng nhập bằng Google không thành công. Vui lòng thử lại.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const handleGoogleError = () => {
@@ -72,6 +87,7 @@ function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={loading}
                 />
                 <input
                   className="w-full px-6 py-3 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-4"
@@ -80,24 +96,54 @@ function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={loading}
                 />
                 <button
                   type="submit"
                   className="cursor-pointer mt-4 tracking-wide font-semibold bg-indigo-500 text-gray-100 w-full py-3 rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
+                  disabled={loading}
                 >
-                  <svg
-                    className="w-5 h-5 -ml-2"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                    <circle cx="8.5" cy={7} r={4} />
-                    <path d="M20 8v6M23 11h-6" />
-                  </svg>
-                  <span className="ml-3">Đăng nhập</span>
+                  {loading ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      <span>Đang xử lý...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-5 h-5 -ml-2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                        <circle cx="8.5" cy={7} r={4} />
+                        <path d="M20 8v6M23 11h-6" />
+                      </svg>
+                      <span className="ml-3">Đăng nhập</span>
+                    </>
+                  )}
                 </button>
                 <p className="mt-4 text-xs text-gray-600 text-center">
                   Bạn chưa có tài khoản?{" "}

@@ -4,6 +4,7 @@ import RatingModal from '../components/RatingModal';
 import { AuthContext } from '../conext/AuthContext';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const MyTasks = () => {
   const [activeTab, setActiveTab] = useState('posted');
@@ -18,6 +19,7 @@ const MyTasks = () => {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   
   // Pagination state
   const [pagination, setPagination] = useState({
@@ -430,7 +432,9 @@ const MyTasks = () => {
             </svg>
             <p className="text-gray-500 mb-4">Không có công việc nào trong mục này</p>
             {activeTab === 'posted' && (
-              <button className="mt-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors duration-150 font-medium shadow-sm flex items-center mx-auto">
+              <button
+              onClick={() => navigate('/browse-tasks')}
+              className="mt-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors duration-150 font-medium shadow-sm flex items-center mx-auto">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>

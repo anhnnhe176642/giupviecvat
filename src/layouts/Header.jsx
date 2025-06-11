@@ -48,10 +48,11 @@ function Header() {
             />
           </Link>
           <div className="hidden md:flex ml-10 space-x-6">
+            <Link to="/" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Về chúng tôi</Link>
             <Link to="/browse-tasks" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Tìm công việc</Link>
             <Link to="/my-tasks" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Công việc của tôi</Link>
             <Link to="/chat" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Tin nhắn</Link>
-            <Link to="/" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Đánh giá</Link>
+            <Link to="#" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Đánh giá</Link>
             {user && (
               <Link to="/dashboard" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Bảng điều khiển</Link>
             )}

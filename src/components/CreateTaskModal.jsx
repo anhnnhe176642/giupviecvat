@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { X, Plus, Minus, Compass, Loader } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
 import LocationPicker from './map/LocationPicker';
 import axios from 'axios';
+import { AuthContext } from '../conext/AuthContext';
+import toast from 'react-hot-toast';
 
 // Fix for default marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -27,6 +29,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationError, setLocationError] = useState(null);
   const [mapStyle, setMapStyle] = useState('stadiaBright');
+  const {user} = useContext(AuthContext);
   
   // New state for categories
   const [categories, setCategories] = useState([]);
@@ -179,7 +182,10 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
     if (!description.trim()) errors.description = 'Vui lòng nhập mô tả công việc';
     if (!markerPosition) errors.location = 'Vui lòng chọn vị trí trên bản đồ';
     if (!selectedCategory) errors.category = 'Vui lòng chọn thể loại công việc';
-    
+    if (!user) {
+      toast.error("Bạn cần đăng nhập để tạo công việc mới.");
+      return false;
+    }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };

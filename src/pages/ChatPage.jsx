@@ -580,11 +580,6 @@ const ChatPage = () => {
                             </div>
                           ))}
 
-                          {/* Debug indicator - can be removed later */}
-                          <div className="col-span-12 text-center text-xs text-gray-400 py-1">
-                            {isInitialLoad ? "Loading conversation..." : ""}
-                          </div>
-
                           {/* Scroll to this element - make sure it's always at the end */}
                           <div ref={scrollEnd} className="col-span-12 h-1" />
                         </div>

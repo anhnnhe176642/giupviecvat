@@ -57,7 +57,7 @@ const TaskCard = ({
     >
       <div className="flex justify-between items-start mb-2">
         <div>
-          <h3 className="font-semibold text-lg text-gray-900 leading-tight max-w-xs break-all">
+          <h3 className="font-semibold text-lg text-gray-900 leading-tight max-w-xs break-keep">
             {task.title}
           </h3>
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full mt-1 inline-block ${statusStyle}`}>

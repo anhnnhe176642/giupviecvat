@@ -135,13 +135,12 @@ function Header() {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white py-2 px-4 shadow-md absolute top-16 left-0 right-0 z-50">
           <div className="flex flex-col space-y-3">
-            <Link to="/" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Danh mục</Link>
-            <Link to="/browse-tasks" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Tìm công việc</Link>
-            <Link to="/my-tasks" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Công việc của tôi</Link>
-            <Link to="/" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Đánh giá</Link>
-            <Link to="/chat" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Tin nhắn</Link>
+            <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Về chúng tôi</Link>
+            <Link to="/browse-tasks" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Tìm công việc</Link>
+            <Link to="/my-tasks" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Công việc của tôi</Link>
+            <Link to="/chat" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Tin nhắn</Link>
             {user && (
-              <Link to="/dashboard" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Bảng điều khiển</Link>
+              <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Bảng điều khiển</Link>
             )}
             
             {user ? (
@@ -154,14 +153,14 @@ function Header() {
                   />
                   <span className="text-green-600 font-medium">{user.name || "User"}</span>
                 </div>
-                <Link to="/profile" className="text-green-600 hover:text-green-800 py-2 pl-10 transition-colors duration-200">Hồ sơ cá nhân</Link>
-                <Link to="/dashboard" className="text-green-600 hover:text-green-800 py-2 pl-10 transition-colors duration-200">Quản lí công việc</Link>
+                <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 pl-10 transition-colors duration-200">Hồ sơ cá nhân</Link>
+                <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 pl-10 transition-colors duration-200">Quản lí công việc</Link>
                 <button onClick={handleLogout} className="text-green-600 hover:text-green-800 py-2 text-left pl-10 transition-colors duration-200">Đăng xuất</button>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Đăng nhập</Link>
-                <Link to="/register" className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 inline-block text-center transition-colors duration-200">Đăng ký Tasker</Link>
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Đăng nhập</Link>
+                <Link to="/register" onClick={() => setIsMobileMenuOpen(false)} className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 inline-block text-center transition-colors duration-200">Đăng ký</Link>
               </>
             )}
           </div>

@@ -353,9 +353,9 @@ function Home() {
             <div className="flex flex-col md:flex-row justify-center gap-6">
               <button 
                 className="bg-white text-green-700 px-8 py-4 rounded-lg font-bold text-lg shadow-2xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:bg-yellow-100"
-                onClick={() => setIsCreateModalOpen(true)}
+                onClick={() => navigate('/register')}
               >
-                Đăng việc ngay
+                Kiếm thêm thu nhập ngay
               </button>
               <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-green-700 transition-all duration-300">
                 Trở thành người giúp việc

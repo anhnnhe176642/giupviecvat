@@ -13,31 +13,49 @@ import { AuthContext } from "./conext/AuthContext"
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
 import LoadingScreen from "./components/LoadingScreen";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { initGA, trackPageView } from "./analytics";
 
 function App() {
-  const {user, isLoading} = useContext(AuthContext);
+  const location = useLocation();
+  const { user, isLoading } = useContext(AuthContext);
+
+  useEffect(() => {
+    initGA();
+  }, []);
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location]);
+
   if (isLoading) {
     return <LoadingScreen />;
   }
+
   return (
-      <>
+    <>
       <Toaster position="bottom-left" reverseOrder={false} />
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
+          <Route
+            path="/profile"
+            element={user ? <ProfilePage /> : <Navigate to="/login" />}
+          />
           <Route path="/my-tasks" element={<MyTasks />} />
         </Route>
         <Route path="/browse-tasks" element={<BrowseTasks />} />
         <Route path="/chat" element={user ? <ChatPage /> : <Navigate to="/login" />} />
         <Route path="/chat/conversation/:id" element={user ? <ChatPage /> : <Navigate to="/login" />} />
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
-        <Route path="/register" element={<Register/>} />
-        <Route path="*" element={<NotFound/>} />
+        <Route path="/register" element={<Register />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
-      </>
+    </>
   );
 }
+
 
 export default App;

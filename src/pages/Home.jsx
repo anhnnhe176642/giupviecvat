@@ -103,14 +103,14 @@ function Home() {
                 className="bg-white text-green-700 px-8 py-4 rounded-lg hover:bg-yellow-100 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 w-full md:w-auto"
                 onClick={() => setIsCreateModalOpen(true)}
               >
-                Đăng việc ngay
+                Đăng công việc của bạn miễn phí
               </button>
               
               <button 
                 className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg hover:bg-white/10 transition-all duration-300 font-bold text-lg w-full md:w-auto"
                 onClick={() => navigate('/browse-tasks')}
               >
-                Tìm công việc
+                Trở thành người làm kiếm tiền ngay
               </button>
             </div>
           </div>
@@ -355,10 +355,10 @@ function Home() {
                 className="bg-white text-green-700 px-8 py-4 rounded-lg font-bold text-lg shadow-2xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:bg-yellow-100"
                 onClick={() => navigate('/browse-tasks')}
               >
-                Kiếm thêm thu nhập ngay
+                Tìm việc ngay
               </button>
               <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-green-700 transition-all duration-300">
-                Trở thành người giúp việc
+                Trở thành người làm kiếm tiền ngay
               </button>
             </div>
           </div>

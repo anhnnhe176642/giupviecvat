@@ -353,7 +353,7 @@ function Home() {
             <div className="flex flex-col md:flex-row justify-center gap-6">
               <button 
                 className="bg-white text-green-700 px-8 py-4 rounded-lg font-bold text-lg shadow-2xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:bg-yellow-100"
-                onClick={() => navigate('/register')}
+                onClick={() => navigate('/browse-tasks')}
               >
                 Kiếm thêm thu nhập ngay
               </button>

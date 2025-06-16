@@ -13,6 +13,7 @@ import { AuthContext } from "./conext/AuthContext"
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
 import LoadingScreen from "./components/LoadingScreen";
+import LoginRequired from "./components/LoginRequired";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { initGA, trackPageView } from "./analytics";
@@ -47,8 +48,8 @@ function App() {
           <Route path="/my-tasks" element={<MyTasks />} />
         </Route>
         <Route path="/browse-tasks" element={<BrowseTasks />} />
-        <Route path="/chat" element={user ? <ChatPage /> : <Navigate to="/login" />} />
-        <Route path="/chat/conversation/:id" element={user ? <ChatPage /> : <Navigate to="/login" />} />
+        <Route path="/chat" element={user ? <ChatPage /> : <LoginRequired />} />
+        <Route path="/chat/conversation/:id" element={user ? <ChatPage /> : <LoginRequired />} />
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<NotFound />} />

@@ -91,7 +91,7 @@ function Home() {
             </div>
             
             <h2 className="text-4xl md:text-6xl font-extrabold mb-8 text-white leading-tight">
-              Nhận trợ giúp với <span className="text-yellow-300">các công việc</span> hàng ngày
+              Nhận Trợ Giúp Với <span className="text-yellow-300">Các Công Việc</span> Hàng Ngày
             </h2>
             
             <p className="text-xl opacity-90 mb-10 text-green-100 leading-relaxed">

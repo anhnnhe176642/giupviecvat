@@ -6,7 +6,7 @@ import EditTaskModal from "./tasks/EditTaskModal";
 import toast from "react-hot-toast";
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
-import axios from "axios"; // Add axios import
+import axios from "axios"; 
 
 // Function to format currency
 const formatCurrency = (amount) => {
@@ -77,6 +77,10 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask }) =>
   }, [isOpen]);
 
   const handleContactClick = async () => {
+    if(!user) {
+      toast.error("Bạn cần đăng nhập để liên hệ với người đăng công việc.");
+      return;
+    }
     try {
       // Send POST request to create a conversation
       const response = await axios.post(`/conversations/posttask/${task._id}`);

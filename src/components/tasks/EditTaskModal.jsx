@@ -4,6 +4,7 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
 import LocationPicker from '../map/LocationPicker';
+import axios from 'axios';
 
 // Fix for default marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -75,25 +76,29 @@ const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
   }, [isOpen]);
 
   // Reverse geocode to get address from coordinates
-  useEffect(() => {
-    const getAddressFromCoords = async () => {
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${markerPosition[0]}&lon=${markerPosition[1]}&zoom=18&addressdetails=1`
-        );
-        const data = await response.json();
-        if (data && data.display_name) {
-          setAddress(data.display_name);
-        }
-      } catch (error) {
-        console.error("Error fetching address:", error);
-      }
-    };
+useEffect(() => {
+  const getAddressFromCoords = async () => {
+    if (!markerPosition) return;
 
-    if (markerPosition) {
-      getAddressFromCoords();
+    try {
+      const res = await axios.get("/reverse-geocode", {
+        params: {
+          lat: markerPosition[0],
+          lon: markerPosition[1],
+        },
+      });
+
+      if (res.data && res.data.display_name) {
+        setAddress(res.data.display_name);
+      }
+    } catch (error) {
+      console.error("Error fetching address:", error);
     }
-  }, [markerPosition]);
+  };
+
+  getAddressFromCoords();
+}, [markerPosition]);
+
 
   // Get current location using browser geolocation API
   const getCurrentLocation = () => {

@@ -134,20 +134,49 @@ function TaskFilters({
                 Chọn danh mục
               </label>
               <div className="grid grid-cols-2 gap-2 max-h-50 overflow-y-auto pr-1">
-                {categories.map((category) => (
-                  <button
-                    key={category._id}
-                    onClick={() => setSelectedCategory(category._id)}
-                    className={`flex items-center gap-2 p-2 rounded-lg text-sm ${
-                      selectedCategory === category._id
-                        ? 'bg-green-100 text-green-800 border border-green-300'
-                        : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'
-                    }`}
-                  >
-                    {getCategoryIconElement(category)}
-                    <span>{category.name}</span>
-                  </button>
-                ))}
+                {categories.map((category) => {
+                  // Check if this category is in the selected list
+                  const isSelected = selectedCategory
+                    ? selectedCategory.split(',').includes(category._id)
+                    : false;
+                    
+                  return (
+                    <button
+                      key={category._id}
+                      onClick={() => {
+                        // Toggle category selection
+                        let selectedCategories = selectedCategory ? selectedCategory.split(',') : [];
+                        
+                        // Special handling for "all" category
+                        if (category._id === "all") {
+                          // If "all" is clicked, deselect everything else and select only "all"
+                          selectedCategories = ["all"];
+                        } else {
+                          if (isSelected) {
+                            // Remove category if already selected
+                            selectedCategories = selectedCategories.filter(id => id !== category._id);
+                          } else {
+                            // Add category if not selected
+                            selectedCategories.push(category._id);
+                            // If "all" was previously selected, remove it
+                            selectedCategories = selectedCategories.filter(id => id !== "all");
+                          }
+                        }
+                        
+                        // Join back to comma-separated string and update state
+                        setSelectedCategory(selectedCategories.join(','));
+                      }}
+                      className={`flex items-center gap-2 p-2 rounded-lg text-sm ${
+                        isSelected
+                          ? 'bg-green-100 text-green-800 border border-green-300'
+                          : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'
+                      }`}
+                    >
+                      {getCategoryIconElement(category)}
+                      <span>{category.name}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

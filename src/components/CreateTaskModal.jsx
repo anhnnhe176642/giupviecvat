@@ -19,7 +19,7 @@ L.Icon.Default.mergeOptions({
 const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   // Form state
   const [title, setTitle] = useState('');
-  const [price, setPrice] = useState('');
+  const [budget, setBudget] = useState(''); // Renamed from price to budget
   const [description, setDescription] = useState('');
   const [time, setTime] = useState('Linh hoạt');
   const [skills, setSkills] = useState(['']);
@@ -36,6 +36,9 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [categoryError, setCategoryError] = useState(null);
+  
+  // New state for posting fee
+  const [postingFee, setPostingFee] = useState(0);
 
   // Add discount code state
   const [discountCode, setDiscountCode] = useState('');
@@ -180,7 +183,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   const validateForm = () => {
     const errors = {};
     if (!title.trim()) errors.title = 'Vui lòng nhập tiêu đề công việc';
-    if (!price || price <= 0) errors.price = 'Vui lòng nhập giá hợp lệ';
+    if (!budget || budget <= 0) errors.budget = 'Vui lòng nhập ngân sách hợp lệ';
     if (!description.trim()) errors.description = 'Vui lòng nhập mô tả công việc';
     if (!markerPosition) errors.location = 'Vui lòng chọn vị trí trên bản đồ';
     if (!selectedCategory) errors.category = 'Vui lòng chọn thể loại công việc';
@@ -197,14 +200,14 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
     if (validateForm()) {
       const newTask = {
         title,
-        price: Number(price),
+        price: Number(budget), // Use budget instead of price
         description,
         time,
         skills: skills.filter(skill => skill.trim() !== ''),
         location: address,
         lat: markerPosition[0],
         lng: markerPosition[1],
-        category: selectedCategory, // Add category to task data
+        category: selectedCategory,
       };
       
       onCreateTask(newTask);
@@ -228,8 +231,8 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   // Reset form to initial state
   const resetForm = () => {
     setTitle('');
-    setPrice('');
-    setFormattedPrice(''); // Reset formatted price
+    setBudget(''); // Reset budget (changed from price)
+    setFormattedBudget(''); // Reset formatted budget
     setDescription('');
     setTime('Linh hoạt');
     setSkills(['']);
@@ -239,6 +242,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
     setLocationError(null);
     setMapStyle('stadiaBright');
     setSelectedCategory(''); // Reset selected category
+    setPostingFee(0); // Reset posting fee
     setDiscountCode(''); // Reset discount code
     setDiscount(null); // Reset discount
     setTotalPrice(0); // Reset total price
@@ -251,27 +255,40 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
     return number.toLocaleString('vi-VN');
   };
   
-  const [formattedPrice, setFormattedPrice] = useState('');
+  const [formattedBudget, setFormattedBudget] = useState(''); // Renamed from formattedPrice
   
-  const handlePriceChange = (e) => {
+  const handleBudgetChange = (e) => { // Renamed from handlePriceChange
     const rawValue = e.target.value;
     const numericValue = rawValue.replace(/\D/g, '');
-    setPrice(numericValue);
-    setFormattedPrice(formatVND(numericValue));
+    setBudget(numericValue);
+    setFormattedBudget(formatVND(numericValue));
   };
 
-  // Calculate total price when price or discount changes
+  // Update posting fee when category changes
   useEffect(() => {
-    const basePrice = Number(price) || 0;
-    let finalPrice = basePrice;
+    if (selectedCategory && categories.length > 0) {
+      const selectedCat = categories.find(cat => cat._id === selectedCategory);
+      if (selectedCat && selectedCat.price) {
+        setPostingFee(selectedCat.price);
+      } else {
+        setPostingFee(0);
+      }
+    } else {
+      setPostingFee(0);
+    }
+  }, [selectedCategory, categories]);
+
+  // Calculate total price based on posting fee and discount
+  useEffect(() => {
+    let finalPrice = postingFee;
     
     if (discount && discount.percentage) {
-      const discountAmount = basePrice * (discount.percentage / 100);
-      finalPrice = basePrice - discountAmount;
+      const discountAmount = postingFee * (discount.percentage / 100);
+      finalPrice = postingFee - discountAmount;
     }
     
     setTotalPrice(finalPrice);
-  }, [price, discount]);
+  }, [postingFee, discount]);
 
   // Function to check discount code
   const checkDiscountCode = async () => {
@@ -285,10 +302,10 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
       // Simulate API call for demo
       setTimeout(() => {
         // Placeholder discount logic
-        if (discountCode.toLowerCase() === 'welcome10') {
+        if (discountCode.toLowerCase() === 'giam10%') {
           setDiscount({ code: discountCode, percentage: 10 });
           toast.success('Đã áp dụng mã giảm giá 10%');
-        } else if (discountCode.toLowerCase() === 'summer20') {
+        } else if (discountCode.toLowerCase() === 'giam20%') {
           setDiscount({ code: discountCode, percentage: 20 });
           toast.success('Đã áp dụng mã giảm giá 20%');
         } else {
@@ -303,19 +320,6 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
       setIsCheckingDiscount(false);
     }
   };
-
-  // Update Price Based on Selected Category
-  useEffect(() => {
-    if (selectedCategory && categories.length > 0) {
-      const selectedCat = categories.find(cat => cat._id === selectedCategory);
-      if (selectedCat && selectedCat.price) {
-        // Update price based on the selected category
-        const categoryPrice = selectedCat.price.toString();
-        setPrice(categoryPrice);
-        setFormattedPrice(formatVND(categoryPrice));
-      }
-    }
-  }, [selectedCategory, categories]);
 
   if (!isOpen) return null;
 
@@ -364,28 +368,28 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
                 {formErrors.title && <p className="text-red-500 text-xs mt-1.5">{formErrors.title}</p>}
               </div>
               
-              {/* Price */}
+              {/* Budget - renamed from Price */}
               <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Ngân sách (VNĐ) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
-                    id="price"
+                    id="budget"
                     type="text"
-                    value={formattedPrice}
-                    onChange={handlePriceChange}
+                    value={formattedBudget}
+                    onChange={handleBudgetChange}
                     placeholder="VD: 100,000"
                     className={`w-full px-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm ${
-                      formErrors.price ? 'border-red-500' : 'border-gray-200'
+                      formErrors.budget ? 'border-red-500' : 'border-gray-200'
                     }`}
                   />
                   <span className="absolute right-3 top-2.5 text-gray-500 font-medium">VNĐ</span>
                 </div>
-                {formErrors.price && <p className="text-red-500 text-xs mt-1.5">{formErrors.price}</p>}
+                {formErrors.budget && <p className="text-red-500 text-xs mt-1.5">{formErrors.budget}</p>}
               </div>
               
-              {/* Category dropdown - modified to auto-select first option */}
+              {/* Category dropdown */}
               <div>
                 <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Thể loại công việc <span className="text-red-500">*</span>
@@ -418,7 +422,6 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
                       ))}
                     </select>
                   )}
-                  {console.log("selectedCategory =", selectedCategory)}
                 </div>
                 {categoryError && <p className="text-red-500 text-xs mt-1.5">{categoryError}</p>}
                 {formErrors.category && <p className="text-red-500 text-xs mt-1.5">{formErrors.category}</p>}
@@ -644,19 +647,19 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
                 )}
               </div>
 
-              {/* Total price display - new section */}
+              {/* Total price display - updated to show posting fee */}
               <div className="mb-4">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">Tổng tiền khi đăng việc</h3>
                 <div className="p-4 bg-gradient-to-r from-emerald-50 to-gray-50 rounded-lg border border-gray-100 shadow-sm">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-gray-600">Giá gốc:</span>
-                    <span className="font-medium">{formatVND(price)} VNĐ</span>
+                    <span className="text-gray-600">Giá đăng bài:</span>
+                    <span className="font-medium">{formatVND(postingFee+"")} VNĐ</span>
                   </div>
                   
                   {discount && (
                     <div className="flex justify-between items-center mb-1 text-emerald-600">
                       <span>Giảm giá ({discount.percentage}%):</span>
-                      <span>- {formatVND(Math.round(Number(price) * discount.percentage / 100))} VNĐ</span>
+                      <span>- {formatVND(Math.round(postingFee * discount.percentage / 100))} VNĐ</span>
                     </div>
                   )}
                   

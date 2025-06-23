@@ -4,7 +4,6 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
 import LocationPicker from '../map/LocationPicker';
-import axios from 'axios';
 
 // Fix for default marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -39,10 +38,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
   const [mapStyle, setMapStyle] = useState('stadiaBright');
   
   // New state for categories
-  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(task?.category || '');
-  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
-  const [categoryError, setCategoryError] = useState(null);
 
   // Load task data when modal opens
   useEffect(() => {
@@ -61,33 +57,9 @@ const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
       );
       setAddress(task?.location || '');
       setSelectedCategory(task?.category || '');
-      
-      // Fetch categories when modal opens
-      fetchCategories();
     }
   }, [isOpen, task]);
 
-  // Fetch categories from API
-  const fetchCategories = async () => {
-    try {
-      setIsLoadingCategories(true);
-      setCategoryError(null);
-      
-      const response = await axios.get("/categories");
-      
-      if (response.data.success) {
-        const filteredCategories = response.data.categories.filter(cat => cat._id !== "all");
-        setCategories(filteredCategories);
-      } else {
-        setCategoryError("Failed to load categories");
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      setCategoryError("Error loading categories. Please try again.");
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  };
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -322,43 +294,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onEditTask }) => {
                 {formErrors.price && <p className="text-red-500 text-xs mt-1.5">{formErrors.price}</p>}
               </div>
               
-              {/* Category dropdown */}
-              <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Thể loại công việc <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  {isLoadingCategories ? (
-                    <div className="w-full px-3 py-2.5 border border-gray-200 rounded-lg flex items-center justify-center text-gray-500 bg-gray-50">
-                      <Loader size={16} className="animate-spin mr-2" />
-                      Đang tải...
-                    </div>
-                  ) : (
-                    <select
-                      id="category"
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                      className={`w-full px-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm appearance-none ${
-                        formErrors.category ? 'border-red-500' : 'border-gray-200'
-                      }`}
-                      style={{backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, 
-                              backgroundRepeat: 'no-repeat', 
-                              backgroundPosition: 'right 0.75rem center',
-                              backgroundSize: '1rem', 
-                              paddingRight: '2.5rem'}}
-                    >
-                      <option value="">-- Chọn thể loại --</option>
-                      {categories.map((category) => (
-                        <option key={category._id} value={category._id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-                {categoryError && <p className="text-red-500 text-xs mt-1.5">{categoryError}</p>}
-                {formErrors.category && <p className="text-red-500 text-xs mt-1.5">{formErrors.category}</p>}
-              </div>
+
               
               {/* Time/Duration */}
               <div>

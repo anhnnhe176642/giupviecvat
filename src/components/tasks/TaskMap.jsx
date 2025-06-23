@@ -138,7 +138,7 @@ const TaskMap = ({
                   className="ml-2 text-sm font-medium"
                   style={{ color: getCategoryColor(getCategory(task)) }}
                 >
-                  {getCategory(task)}
+                  {getCategory(task).name}
                 </span>
               </div>
               <strong className="block text-lg mb-1">{task.title}</strong>

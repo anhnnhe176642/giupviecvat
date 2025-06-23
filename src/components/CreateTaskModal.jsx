@@ -305,9 +305,9 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
         if (discountCode.toLowerCase() === 'giam10%') {
           setDiscount({ code: discountCode, percentage: 10 });
           toast.success('Đã áp dụng mã giảm giá 10%');
-        } else if (discountCode.toLowerCase() === 'giam20%') {
+        } else if (discountCode.toLowerCase() === 'giam15%') {
           setDiscount({ code: discountCode, percentage: 20 });
-          toast.success('Đã áp dụng mã giảm giá 20%');
+          toast.success('Đã áp dụng mã giảm giá 15%');
         } else {
           setDiscount(null);
           toast.error('Mã giảm giá không hợp lệ');

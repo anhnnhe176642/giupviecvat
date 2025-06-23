@@ -9,7 +9,7 @@ import TaskMap, { MapReference } from "../components/tasks/TaskMap";
 import TaskList from "../components/tasks/TaskList";
 import TaskFilters from "../components/tasks/TaskFilters";
 import toast from "react-hot-toast";
-import { createCategoryIcon, getCategoryColor, getCategoryIconElement, getCategoryName } from "../utils/categoryHelpers";
+import { createCategoryIcon, getCategoryColor, getCategoryIconElement, getCategory } from "../utils/categoryHelpers";
 
 function BrowseTasks() {
   const [tasks, setTasks] = useState([]);
@@ -432,7 +432,7 @@ function BrowseTasks() {
             filteredTasks={filteredTasks}
             handleViewTaskDetails={handleViewTaskDetails}
             createCategoryIcon={createCategoryIcon}
-            getCategoryName={getCategoryName}
+            getCategory={getCategory}
             getCategoryIconElement={getCategoryIconElement}
             getCategoryColor={getCategoryColor}
           />

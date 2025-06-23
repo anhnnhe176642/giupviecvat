@@ -133,7 +133,7 @@ function TaskFilters({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Chọn danh mục
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 max-h-50 overflow-y-auto pr-1">
                 {categories.map((category) => (
                   <button
                     key={category._id}
@@ -144,7 +144,7 @@ function TaskFilters({
                         : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'
                     }`}
                   >
-                    {getCategoryIconElement(category.name)}
+                    {getCategoryIconElement(category)}
                     <span>{category.name}</span>
                   </button>
                 ))}

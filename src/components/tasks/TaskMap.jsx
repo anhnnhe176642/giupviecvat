@@ -55,7 +55,7 @@ const TaskMap = ({
   filteredTasks, 
   handleViewTaskDetails, 
   createCategoryIcon, 
-  getCategoryName,
+  getCategory,
   getCategoryIconElement,
   getCategoryColor 
 }) => {
@@ -122,7 +122,7 @@ const TaskMap = ({
         <Marker
           key={task._id || idx}
           position={[task.lat, task.lng]}
-          icon={createCategoryIcon(getCategoryName(task))}
+          icon={createCategoryIcon(getCategory(task))}
         >
           <Popup minWidth={250}>
             <div className="popup-content">
@@ -133,12 +133,12 @@ const TaskMap = ({
                   marginBottom: "8px",
                 }}
               >
-                {getCategoryIconElement(getCategoryName(task))}
+                {getCategoryIconElement(getCategory(task))}
                 <span
                   className="ml-2 text-sm font-medium"
-                  style={{ color: getCategoryColor(getCategoryName(task)) }}
+                  style={{ color: getCategoryColor(getCategory(task)) }}
                 >
-                  {getCategoryName(task)}
+                  {getCategory(task)}
                 </span>
               </div>
               <strong className="block text-lg mb-1">{task.title}</strong>

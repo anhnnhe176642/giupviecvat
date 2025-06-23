@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { X, Plus, Minus, Compass, Loader } from 'lucide-react';
+import { X, Plus, Minus, Compass, Loader, Tag } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
@@ -37,6 +37,12 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [categoryError, setCategoryError] = useState(null);
 
+  // Add discount code state
+  const [discountCode, setDiscountCode] = useState('');
+  const [isCheckingDiscount, setIsCheckingDiscount] = useState(false);
+  const [discount, setDiscount] = useState(null);
+  const [totalPrice, setTotalPrice] = useState(0);
+
   // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -58,11 +64,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
       if (response.data.success) {
         const filteredCategories = response.data.categories.filter(cat => cat._id !== "all");
         setCategories(filteredCategories);
-        
-        // Set first category as default if there are categories and none is selected
-        if (filteredCategories.length > 0 && !selectedCategory) {
-          setSelectedCategory(filteredCategories[0]._id);
-        }
+  
       } else {
         setCategoryError("Failed to load categories");
       }
@@ -237,10 +239,14 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
     setLocationError(null);
     setMapStyle('stadiaBright');
     setSelectedCategory(''); // Reset selected category
+    setDiscountCode(''); // Reset discount code
+    setDiscount(null); // Reset discount
+    setTotalPrice(0); // Reset total price
   };
 
   const formatVND = (val) => {
     if (!val) return '';
+    if(typeof val !== 'string') val = val.toString();
     const number = parseInt(val.replace(/\D/g, ''), 10) || 0;
     return number.toLocaleString('vi-VN');
   };
@@ -253,6 +259,63 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
     setPrice(numericValue);
     setFormattedPrice(formatVND(numericValue));
   };
+
+  // Calculate total price when price or discount changes
+  useEffect(() => {
+    const basePrice = Number(price) || 0;
+    let finalPrice = basePrice;
+    
+    if (discount && discount.percentage) {
+      const discountAmount = basePrice * (discount.percentage / 100);
+      finalPrice = basePrice - discountAmount;
+    }
+    
+    setTotalPrice(finalPrice);
+  }, [price, discount]);
+
+  // Function to check discount code
+  const checkDiscountCode = async () => {
+    if (!discountCode.trim()) return;
+    
+    setIsCheckingDiscount(true);
+    try {
+      // Placeholder for API call - implement actual API call in production
+      // const response = await axios.get(`/discounts/${discountCode}`);
+      
+      // Simulate API call for demo
+      setTimeout(() => {
+        // Placeholder discount logic
+        if (discountCode.toLowerCase() === 'welcome10') {
+          setDiscount({ code: discountCode, percentage: 10 });
+          toast.success('Đã áp dụng mã giảm giá 10%');
+        } else if (discountCode.toLowerCase() === 'summer20') {
+          setDiscount({ code: discountCode, percentage: 20 });
+          toast.success('Đã áp dụng mã giảm giá 20%');
+        } else {
+          setDiscount(null);
+          toast.error('Mã giảm giá không hợp lệ');
+        }
+        setIsCheckingDiscount(false);
+      }, 1000);
+    } catch (error) {
+      console.error('Error checking discount code:', error);
+      toast.error('Có lỗi khi kiểm tra mã giảm giá');
+      setIsCheckingDiscount(false);
+    }
+  };
+
+  // Update Price Based on Selected Category
+  useEffect(() => {
+    if (selectedCategory && categories.length > 0) {
+      const selectedCat = categories.find(cat => cat._id === selectedCategory);
+      if (selectedCat && selectedCat.price) {
+        // Update price based on the selected category
+        const categoryPrice = selectedCat.price.toString();
+        setPrice(categoryPrice);
+        setFormattedPrice(formatVND(categoryPrice));
+      }
+    }
+  }, [selectedCategory, categories]);
 
   if (!isOpen) return null;
 
@@ -304,7 +367,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
               {/* Price */}
               <div>
                 <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Giá (VNĐ) <span className="text-red-500">*</span>
+                  Ngân sách (VNĐ) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -322,7 +385,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
                 {formErrors.price && <p className="text-red-500 text-xs mt-1.5">{formErrors.price}</p>}
               </div>
               
-              {/* Category dropdown - new field */}
+              {/* Category dropdown - modified to auto-select first option */}
               <div>
                 <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Thể loại công việc <span className="text-red-500">*</span>
@@ -350,11 +413,12 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
                       <option value="">-- Chọn thể loại --</option>
                       {categories.map((category) => (
                         <option key={category._id} value={category._id}>
-                          {category.name}
+                          {category.name} ({formatVND(category.price+"")} VNĐ)
                         </option>
                       ))}
                     </select>
                   )}
+                  {console.log("selectedCategory =", selectedCategory)}
                 </div>
                 {categoryError && <p className="text-red-500 text-xs mt-1.5">{categoryError}</p>}
                 {formErrors.category && <p className="text-red-500 text-xs mt-1.5">{formErrors.category}</p>}
@@ -445,6 +509,8 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
             
             {/* Right column - Map and location */}
             <div className="space-y-5">
+
+              {/* Map and location */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="block text-sm font-medium text-gray-700">
@@ -526,6 +592,78 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
                 </label>
                 <div className="p-4 bg-gradient-to-r from-emerald-50 to-gray-50 rounded-lg min-h-[80px] break-words text-sm shadow-sm border border-gray-100">
                   {address || "Chưa chọn vị trí"}
+                </div>
+              </div>
+              
+              {/* Discount code - new field */}
+              <div>
+                <label htmlFor="discountCode" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Mã giảm giá (nếu có)
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-grow">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Tag size={16} className="text-gray-400" />
+                    </div>
+                    <input
+                      id="discountCode"
+                      type="text"
+                      value={discountCode}
+                      onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                      placeholder="Nhập mã giảm giá"
+                      className="w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={checkDiscountCode}
+                    disabled={isCheckingDiscount || !discountCode.trim()}
+                    className={`px-4 py-2.5 rounded-lg font-medium ${
+                      isCheckingDiscount || !discountCode.trim()
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-emerald-500 text-white hover:bg-emerald-600'
+                    } transition-all shadow-sm`}
+                  >
+                    {isCheckingDiscount ? (
+                      <Loader size={16} className="animate-spin" />
+                    ) : 'Áp dụng'}
+                  </button>
+                </div>
+                
+                {/* Show discount info if applied */}
+                {discount && (
+                  <div className="mt-2 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-lg text-sm text-emerald-700 flex items-center">
+                    <span className="font-medium">Giảm giá: {discount.percentage}%</span>
+                    <button 
+                      className="ml-auto text-emerald-600 hover:text-emerald-800"
+                      onClick={() => setDiscount(null)}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Total price display - new section */}
+              <div className="mb-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Tổng tiền khi đăng việc</h3>
+                <div className="p-4 bg-gradient-to-r from-emerald-50 to-gray-50 rounded-lg border border-gray-100 shadow-sm">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-gray-600">Giá gốc:</span>
+                    <span className="font-medium">{formatVND(price)} VNĐ</span>
+                  </div>
+                  
+                  {discount && (
+                    <div className="flex justify-between items-center mb-1 text-emerald-600">
+                      <span>Giảm giá ({discount.percentage}%):</span>
+                      <span>- {formatVND(Math.round(Number(price) * discount.percentage / 100))} VNĐ</span>
+                    </div>
+                  )}
+                  
+                  <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between items-center">
+                    <span className="font-bold text-gray-700">Tổng cộng:</span>
+                    <span className="font-bold text-lg text-emerald-700">{formatVND(totalPrice)} VNĐ</span>
+                  </div>
                 </div>
               </div>
             </div>

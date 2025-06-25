@@ -2,7 +2,9 @@ export default {
   // ...existing config...
   theme: {
     extend: {
-      // ...other extensions...
+      fontFamily: {
+        roboto: ['Roboto', 'sans-serif'],
+      },
       animation: {
         'fadeIn': 'fadeIn 0.3s ease-in-out',
       },

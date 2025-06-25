@@ -661,18 +661,12 @@ function ReferFriends() {
             >
               Hãy bắt đầu chia sẻ ngay hôm nay và cùng nhau tận hưởng những ưu đãi hấp dẫn
             </motion.p>
-            <motion.button 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.05, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
-              whileTap={{ scale: 0.95 }}
+            <button 
               onClick={scrollToShare}
               className="bg-white text-green-700 px-10 py-5 rounded-full hover:bg-yellow-100 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-xl transform hover:-translate-y-1"
             >
               Chia sẻ ngay bây giờ
-            </motion.button>
+            </button>
           </motion.div>
         </div>
       </section>

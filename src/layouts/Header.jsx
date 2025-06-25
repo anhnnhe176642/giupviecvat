@@ -52,6 +52,8 @@ function Header() {
             <Link to="/browse-tasks" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Tìm công việc</Link>
             <Link to="/my-tasks" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Công việc của tôi</Link>
             <Link to="/chat" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Tin nhắn</Link>
+            
+            <Link to="/refer-friends" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Mời bạn bè</Link>
             <Link to="#" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Đánh giá</Link>
             {user && (
               <Link to="/dashboard" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Bảng điều khiển</Link>
@@ -139,6 +141,7 @@ function Header() {
             <Link to="/browse-tasks" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Tìm công việc</Link>
             <Link to="/my-tasks" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Công việc của tôi</Link>
             <Link to="/chat" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Tin nhắn</Link>
+            <Link to="/refer-friends" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Mời bạn bè</Link>
             {user && (
               <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Bảng điều khiển</Link>
             )}

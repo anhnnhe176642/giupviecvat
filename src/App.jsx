@@ -17,6 +17,7 @@ import LoginRequired from "./components/LoginRequired";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { initGA, trackPageView } from "./analytics";
+import ReferFriends from "./pages/ReferFriends";
 
 function App() {
   const location = useLocation();
@@ -46,6 +47,7 @@ function App() {
             element={user ? <ProfilePage /> : <Navigate to="/login" />}
           />
           <Route path="/my-tasks" element={<MyTasks />} />
+          <Route path="/refer-friends" element={<ReferFriends />} />
         </Route>
         <Route path="/browse-tasks" element={<BrowseTasks />} />
         <Route path="/chat" element={user ? <ChatPage /> : <LoginRequired />} />

@@ -5,8 +5,16 @@ import toast from 'react-hot-toast';
 
 function ReferFriends() {
   const [copied, setCopied] = useState(false);
-  const referralLink = "https://giupviecvat.vercel.app"; // This would be dynamic based on user ID
+  const referralLink = "https://giupviecvat.vercel.app/ref/G54FNWE4"; // This would be dynamic based on user ID
   const [isVisible, setIsVisible] = useState({});
+  
+  // Add scrollToShare function
+  const scrollToShare = () => {
+    const shareSection = document.getElementById('share');
+    if (shareSection) {
+      shareSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -193,6 +201,7 @@ function ReferFriends() {
               transition={{ delay: 0.9, duration: 0.8 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={scrollToShare}
               className="bg-white text-green-700 px-10 py-4 rounded-full hover:bg-yellow-100 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl"
             >
               Bắt đầu giới thiệu ngay
@@ -659,6 +668,7 @@ function ReferFriends() {
               viewport={{ once: true }}
               whileHover={{ scale: 1.05, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
               whileTap={{ scale: 0.95 }}
+              onClick={scrollToShare}
               className="bg-white text-green-700 px-10 py-5 rounded-full hover:bg-yellow-100 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-xl transform hover:-translate-y-1"
             >
               Chia sẻ ngay bây giờ

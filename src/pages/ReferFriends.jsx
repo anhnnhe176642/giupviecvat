@@ -325,7 +325,7 @@ function ReferFriends() {
                         <div className="bg-yellow-100 rounded-full p-2 mr-3">
                           <FaCoins className="text-yellow-500" />
                         </div>
-                        <span>100.000đ cho mỗi bạn bè đăng ký thành công</span>
+                        <span>50.000đ cho mỗi bạn bè đăng ký thành công</span>
                       </li>
                       <li className="flex items-center text-lg">
                         <div className="bg-green-100 rounded-full p-2 mr-3">
@@ -362,7 +362,7 @@ function ReferFriends() {
                         <div className="bg-yellow-100 rounded-full p-2 mr-3">
                           <FaCoins className="text-yellow-500" />
                         </div>
-                        <span>50.000đ vào tài khoản khi đăng ký</span>
+                        <span>100.000đ vào tài khoản khi đăng ký</span>
                       </li>
                       <li className="flex items-center text-lg">
                         <div className="bg-green-100 rounded-full p-2 mr-3">

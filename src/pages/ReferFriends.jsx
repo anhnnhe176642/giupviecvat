@@ -592,7 +592,7 @@ function ReferFriends() {
                 },
                 {
                   q: "Phần thưởng có hạn sử dụng không?",
-                  a: "Phần thưởng tiền mặt không có thời hạn sử dụng. Mã giảm giá thường có thời hạn 30 ngày kể từ ngày nhận được."
+                  a: "Phần thưởng không có thời hạn sử dụng. Mã giảm giá thường có thời hạn 30 ngày kể từ ngày nhận được."
                 },
               ].map((item, idx) => (
                 <motion.div 

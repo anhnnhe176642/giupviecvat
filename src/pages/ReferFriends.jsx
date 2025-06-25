@@ -238,9 +238,9 @@ function ReferFriends() {
             <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-10">
               <motion.div 
                 whileHover={{ scale: 1.02 }}
-                className="bg-gray-50 p-5 rounded-xl flex-1 flex items-center overflow-x-auto shadow-inner border border-gray-100"
+                className="bg-gray-50 p-3 md:p-5 rounded-xl flex-1 flex items-center overflow-x-auto shadow-inner border border-gray-100"
               >
-                <span className="text-gray-600 whitespace-nowrap font-medium">{referralLink}</span>
+                <span className="text-gray-600 text-sm md:text-base font-medium overflow-hidden overflow-ellipsis break-all">{referralLink}</span>
               </motion.div>
               <motion.button 
                 onClick={copyToClipboard} 

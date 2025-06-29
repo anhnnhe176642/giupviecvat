@@ -16,6 +16,7 @@ const AdminLayout = () => {
     { name: 'Dashboard', href: '/admin', current: location.pathname === '/admin' },
     { name: 'Quản lý người dùng', href: '/admin/users', current: location.pathname === '/admin/users' },
     { name: 'Quản lý công việc', href: '/admin/tasks', current: location.pathname === '/admin/tasks' },
+    { name: 'Quản lý danh mục', href: '/admin/categories', current: location.pathname === '/admin/categories' },
   ];
 
   return (

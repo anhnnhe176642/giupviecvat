@@ -1,8 +1,10 @@
 import { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../conext/AuthContext';
 
 const AdminDashboard = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -94,7 +96,10 @@ const AdminDashboard = () => {
               Quản lý hệ thống
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer">
+              <div 
+                onClick={() => navigate('/admin/users')}
+                className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+              >
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   Quản lý người dùng
                 </h3>
@@ -103,12 +108,27 @@ const AdminDashboard = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer">
+              <div 
+                onClick={() => navigate('/admin/tasks')}
+                className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+              >
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   Quản lý công việc
                 </h3>
                 <p className="text-sm text-gray-600">
                   Xem và quản lý tất cả công việc
+                </p>
+              </div>
+
+              <div 
+                onClick={() => navigate('/admin/categories')}
+                className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Quản lý danh mục
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Quản lý danh mục dịch vụ
                 </p>
               </div>
 

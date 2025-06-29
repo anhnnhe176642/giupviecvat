@@ -24,6 +24,7 @@ import AdminLayout from "./layouts/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import TaskManagement from "./pages/admin/TaskManagement";
+import CategoryManagement from "./pages/admin/CategoryManagement";
 
 function App() {
   const location = useLocation();
@@ -70,6 +71,7 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="tasks" element={<TaskManagement />} />
+          <Route path="categories" element={<CategoryManagement />} />
         </Route>
         
         <Route path="/unauthorized" element={<Unauthorized />} />

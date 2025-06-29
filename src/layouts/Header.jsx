@@ -103,6 +103,13 @@ function Header() {
                     >
                       Quản lí công việc
                     </Link>
+                    <Link 
+                      to="/account" 
+                      className="block px-4 py-2 text-sm text-green-700 hover:bg-green-50 transition-colors duration-200"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                    >
+                      Quản lý tài khoản
+                    </Link>
                     {user.role === 'admin' && (
                       <Link 
                         to="/admin" 

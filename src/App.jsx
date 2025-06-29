@@ -25,6 +25,11 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import TaskManagement from "./pages/admin/TaskManagement";
 import CategoryManagement from "./pages/admin/CategoryManagement";
+import AccountManagement from "./pages/AccountManagement";
+import Balance from "./pages/account/Balance";
+import Deposit from "./pages/account/Deposit";
+import TransactionHistory from "./pages/account/TransactionHistory";
+import VoucherHistory from "./pages/account/VoucherHistory";
 
 function App() {
   const location = useLocation();
@@ -55,10 +60,20 @@ function App() {
           />
           <Route path="/my-tasks" element={<MyTasks />} />
           <Route path="/refer-friends" element={<ReferFriends />} />
+          
+          {/* Account Management Routes */}
+          <Route path="/account" element={user ? <AccountManagement /> : <Navigate to="/login" />}>
+            <Route index element={<Navigate to="/account/balance" replace />} />
+            <Route path="balance" element={<Balance />} />
+            <Route path="deposit" element={<Deposit />} />
+            <Route path="history" element={<TransactionHistory />} />
+            <Route path="vouchers" element={<VoucherHistory />} />
+          </Route>
         </Route>
         <Route path="/browse-tasks" element={<BrowseTasks />} />
         <Route path="/chat" element={user ? <ChatPage /> : <LoginRequired />} />
         <Route path="/chat/conversation/:id" element={user ? <ChatPage /> : <LoginRequired />} />
+        
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
         <Route path="/register" element={<Register />} />
         

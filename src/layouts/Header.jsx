@@ -58,6 +58,9 @@ function Header() {
             {user && (
               <Link to="/dashboard" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Bảng điều khiển</Link>
             )}
+            {user && user.role === 'admin' && (
+              <Link to="/admin" className="text-red-600 hover:text-red-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-red-600 py-1">Admin</Link>
+            )}
           </div>
         </div>
         <div className="flex items-center space-x-4">
@@ -100,6 +103,15 @@ function Header() {
                     >
                       Quản lí công việc
                     </Link>
+                    {user.role === 'admin' && (
+                      <Link 
+                        to="/admin" 
+                        className="block px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors duration-200"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      >
+                        Quản trị hệ thống
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 transition-colors duration-200"
@@ -145,6 +157,9 @@ function Header() {
             {user && (
               <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Bảng điều khiển</Link>
             )}
+            {user && user.role === 'admin' && (
+              <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="text-red-600 hover:text-red-800 py-2 transition-colors duration-200">Admin</Link>
+            )}
             
             {user ? (
               <>
@@ -158,6 +173,9 @@ function Header() {
                 </div>
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 pl-10 transition-colors duration-200">Hồ sơ cá nhân</Link>
                 <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 pl-10 transition-colors duration-200">Quản lí công việc</Link>
+                {user.role === 'admin' && (
+                  <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="text-red-600 hover:text-red-800 py-2 pl-10 transition-colors duration-200">Quản trị hệ thống</Link>
+                )}
                 <button onClick={handleLogout} className="text-green-600 hover:text-green-800 py-2 text-left pl-10 transition-colors duration-200">Đăng xuất</button>
               </>
             ) : (

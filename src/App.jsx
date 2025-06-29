@@ -18,6 +18,12 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { initGA, trackPageView } from "./analytics";
 import ReferFriends from "./pages/ReferFriends";
+import RoleBasedRoute from "./components/RoleBasedRoute";
+import Unauthorized from "./pages/Unauthorized";
+import AdminLayout from "./layouts/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import TaskManagement from "./pages/admin/TaskManagement";
 
 function App() {
   const location = useLocation();
@@ -54,6 +60,19 @@ function App() {
         <Route path="/chat/conversation/:id" element={user ? <ChatPage /> : <LoginRequired />} />
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
         <Route path="/register" element={<Register />} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin" element={
+          <RoleBasedRoute allowedRoles={['admin']}>
+            <AdminLayout />
+          </RoleBasedRoute>
+        }>
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="tasks" element={<TaskManagement />} />
+        </Route>
+        
+        <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

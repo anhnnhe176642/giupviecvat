@@ -260,7 +260,7 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEditTask, onDeleteTask }) =>
                       className="w-14 h-14 rounded-full mr-4 object-cover ring-4 ring-white shadow-md flex-shrink-0"
                     />
                     <div className="min-w-0">
-                      <p className="font-semibold text-gray-800 truncate">{task.poster?.name || "Người dùng TaskerAir"}</p>
+                      <p className="font-semibold text-gray-800 truncate">{task.poster?.name || "Người dùng GiupViecVat"}</p>
                       <div className="flex flex-wrap items-center text-sm mt-1 gap-2">
                         <div className="bg-yellow-50 border border-yellow-100 px-2 py-0.5 rounded-md flex items-center">
                           <Star size={14} className="text-yellow-500 mr-1" />

@@ -161,6 +161,7 @@ function Header() {
             <Link to="/my-tasks" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Công việc của tôi</Link>
             <Link to="/chat" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Tin nhắn</Link>
             <Link to="/refer-friends" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Mời bạn bè</Link>
+            <Link to="/account" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Tài Khoản</Link>
             {user && (
               <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 transition-colors duration-200">Bảng điều khiển</Link>
             )}
@@ -180,6 +181,7 @@ function Header() {
                 </div>
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 pl-10 transition-colors duration-200">Hồ sơ cá nhân</Link>
                 <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 pl-10 transition-colors duration-200">Quản lí công việc</Link>
+                <Link to="/account" onClick={() => setIsMobileMenuOpen(false)} className="text-green-600 hover:text-green-800 py-2 pl-10 transition-colors duration-200">Quản lý tài khoản</Link>
                 {user.role === 'admin' && (
                   <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="text-red-600 hover:text-red-800 py-2 pl-10 transition-colors duration-200">Quản trị hệ thống</Link>
                 )}

@@ -7,6 +7,7 @@ import LocationPicker from './map/LocationPicker';
 import axios from 'axios';
 import { AuthContext } from '../conext/AuthContext';
 import toast from 'react-hot-toast';
+import { getUserBalance } from '../services/api';
 
 // Fix for default marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -47,6 +48,11 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   const [voucherError, setVoucherError] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
   const [showVoucherList, setShowVoucherList] = useState(false);
+
+  // New state for user balance
+  const [userBalance, setUserBalance] = useState(0);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+  const [balanceError, setBalanceError] = useState(null);
 
   // Fetch categories from API
   const fetchCategories = async () => {
@@ -95,15 +101,37 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
     }
   }, [postingFee]);
 
+  // Fetch user balance from API
+  const fetchUserBalance = useCallback(async () => {
+    try {
+      setIsLoadingBalance(true);
+      setBalanceError(null);
+      
+      const data = await getUserBalance();
+      
+      if (data.success) {
+        setUserBalance(data.balance);
+      } else {
+        setBalanceError("Failed to load balance");
+      }
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+      setBalanceError("Error loading balance. Please try again.");
+    } finally {
+      setIsLoadingBalance(false);
+    }
+  }, []);
+
   // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       resetForm();
     } else {
-      // Fetch categories when modal opens
+      // Fetch categories and balance when modal opens
       fetchCategories();
+      fetchUserBalance();
     }
-  }, [isOpen]);
+  }, [isOpen, fetchUserBalance]);
 
   // Fetch available vouchers when posting fee changes
   useEffect(() => {
@@ -284,6 +312,9 @@ useEffect(() => {
     setSelectedVoucher(null); // Reset selected voucher
     setShowVoucherList(false); // Reset voucher list display
     setTotalPrice(0); // Reset total price
+    setUserBalance(0); // Reset user balance
+    setIsLoadingBalance(false); // Reset loading state
+    setBalanceError(null); // Reset balance error
   };
 
   const formatVND = (val) => {
@@ -623,16 +654,35 @@ useEffect(() => {
                   Số dư hiện tại
                 </label>
                 <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Số dư khả dụng:</span>
-                    <span className="font-bold text-lg text-blue-700">
-                      {formatVND((user?.balance || 0).toString())} VNĐ
-                    </span>
-                  </div>
-                  {user?.balance < totalPrice && totalPrice > 0 && (
-                    <p className="text-red-600 text-xs mt-1">
-                      Số dư không đủ để thực hiện giao dịch này
-                    </p>
+                  {isLoadingBalance ? (
+                    <div className="flex items-center justify-center py-2">
+                      <Loader size={16} className="animate-spin mr-2" />
+                      <span className="text-sm text-gray-600">Đang tải số dư...</span>
+                    </div>
+                  ) : balanceError ? (
+                    <div className="text-center py-2">
+                      <p className="text-red-600 text-sm">{balanceError}</p>
+                      <button
+                        onClick={fetchUserBalance}
+                        className="text-xs text-blue-600 hover:text-blue-700 mt-1"
+                      >
+                        Thử lại
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Số dư khả dụng:</span>
+                        <span className="font-bold text-lg text-blue-700">
+                          {formatVND(userBalance.toString())} VNĐ
+                        </span>
+                      </div>
+                      {userBalance < totalPrice && totalPrice > 0 && (
+                        <p className="text-red-600 text-xs mt-1">
+                          Số dư không đủ để thực hiện giao dịch này
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -736,15 +786,15 @@ useEffect(() => {
                   <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between items-center">
                     <span className="font-bold text-gray-700">Tổng cộng:</span>
                     <span className={`font-bold text-lg ${
-                      user?.balance >= totalPrice ? 'text-emerald-700' : 'text-red-600'
+                      userBalance >= totalPrice ? 'text-emerald-700' : 'text-red-600'
                     }`}>
                       {formatVND(totalPrice.toString())} VNĐ
                     </span>
                   </div>
                   
-                  {user?.balance < totalPrice && totalPrice > 0 && (
+                  {userBalance < totalPrice && totalPrice > 0 && (
                     <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
-                      ⚠️ Số dư không đủ. Vui lòng nạp thêm {formatVND((totalPrice - (user?.balance || 0)).toString())} VNĐ
+                      ⚠️ Số dư không đủ. Vui lòng nạp thêm {formatVND((totalPrice - userBalance).toString())} VNĐ
                     </div>
                   )}
                 </div>
@@ -763,14 +813,14 @@ useEffect(() => {
           </button>
           <button 
             onClick={handleSubmit}
-            disabled={user?.balance < totalPrice && totalPrice > 0}
+            disabled={userBalance < totalPrice && totalPrice > 0}
             className={`px-6 py-2.5 rounded-lg transition-all shadow-md font-medium ${
-              user?.balance < totalPrice && totalPrice > 0
+              userBalance < totalPrice && totalPrice > 0
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                 : 'bg-gradient-to-r from-emerald-600 to-green-700 text-white hover:from-emerald-700 hover:to-green-800'
             }`}
           >
-            {user?.balance < totalPrice && totalPrice > 0 ? 'Số dư không đủ' : 'Tạo công việc'}
+            {userBalance < totalPrice && totalPrice > 0 ? 'Số dư không đủ' : 'Tạo công việc'}
           </button>
         </div>
       </div>

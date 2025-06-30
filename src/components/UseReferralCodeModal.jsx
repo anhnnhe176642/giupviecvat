@@ -5,8 +5,6 @@ import { useReferralCode as applyReferralCode, validateReferralCode } from '../s
 
 const UseReferralCodeModal = ({ isOpen, onClose, onSuccess }) => {
   const [referralCode, setReferralCode] = useState('');
-  const [referralInfo, setReferralInfo] = useState(null);
-  const [isValidating, setIsValidating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Prevent background scrolling when modal is open
@@ -22,38 +20,9 @@ const UseReferralCodeModal = ({ isOpen, onClose, onSuccess }) => {
     };
   }, [isOpen]);
 
-  const validateCode = async (code) => {
-    if (!code || code.length < 3) {
-      setReferralInfo(null);
-      return;
-    }
-
-    try {
-      setIsValidating(true);
-      const response = await validateReferralCode(code);
-      if (response.success) {
-        setReferralInfo(response.data);
-      } else {
-        setReferralInfo(null);
-      }
-    } catch (error) {
-      setReferralInfo(null);
-      console.error('Error validating referral:', error);
-    } finally {
-      setIsValidating(false);
-    }
-  };
-
   const handleCodeChange = (e) => {
     const code = e.target.value.toUpperCase();
     setReferralCode(code);
-    
-    // Debounce validation
-    setTimeout(() => {
-      if (code === referralCode) {
-        validateCode(code);
-      }
-    }, 500);
   };
 
   const handleSubmit = async (e) => {
@@ -64,17 +33,27 @@ const UseReferralCodeModal = ({ isOpen, onClose, onSuccess }) => {
       return;
     }
 
-    if (!referralInfo) {
-      toast.error('Mã giới thiệu không hợp lệ');
-      return;
-    }
-
     try {
       setIsSubmitting(true);
+      
+      // Validate code first
+      const validationResponse = await validateReferralCode(referralCode);
+      if (!validationResponse.success) {
+        toast.error('Mã giới thiệu không hợp lệ hoặc đã được sử dụng');
+        return;
+      }
+      
+      // If validation passes, apply the referral code
       const response = await applyReferralCode(referralCode);
       
       if (response.success) {
         toast.success(response.message || 'Sử dụng mã giới thiệu thành công!');
+        // Show bonus information if available
+        if (response.data?.bonus) {
+          setTimeout(() => {
+            toast.success(response.data.bonus, { duration: 5000 });
+          }, 1000);
+        }
         onSuccess && onSuccess(response.data);
         handleClose();
       } else {
@@ -82,7 +61,12 @@ const UseReferralCodeModal = ({ isOpen, onClose, onSuccess }) => {
       }
     } catch (error) {
       console.error('Error using referral code:', error);
-      toast.error(error.response?.data?.message || 'Có lỗi xảy ra');
+      // Handle structured error response
+      if (error.success === false) {
+        toast.error(error.message || 'Có lỗi xảy ra');
+      } else {
+        toast.error(error.response?.data?.message || error.message || 'Có lỗi xảy ra');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -90,8 +74,6 @@ const UseReferralCodeModal = ({ isOpen, onClose, onSuccess }) => {
 
   const handleClose = () => {
     setReferralCode('');
-    setReferralInfo(null);
-    setIsValidating(false);
     setIsSubmitting(false);
     onClose();
   };
@@ -138,42 +120,10 @@ const UseReferralCodeModal = ({ isOpen, onClose, onSuccess }) => {
                     value={referralCode}
                     onChange={handleCodeChange}
                     placeholder="Nhập mã giới thiệu (VD: FRIEND2025)"
-                    className={`w-full px-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm transition-all ${
-                      referralInfo ? 'border-emerald-400 bg-emerald-50' : 
-                      referralCode && !referralInfo && !isValidating ? 'border-red-400 bg-red-50' : 
-                      'border-gray-200'
-                    }`}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm transition-all"
                     maxLength={20}
                   />
-                  {isValidating && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <Loader size={16} className="animate-spin text-gray-500" />
-                    </div>
-                  )}
                 </div>
-                
-                {/* Success state */}
-                {referralInfo && (
-                  <div className="mt-3 p-4 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-lg">
-                    <div className="flex items-center mb-2">
-                      <CheckCircle size={16} className="text-emerald-500 mr-2" />
-                      <span className="text-sm text-emerald-700 font-medium">
-                        Mã hợp lệ từ: {referralInfo.referrerName}
-                      </span>
-                    </div>
-                    <div className="text-sm text-emerald-600 flex items-center">
-                      <Gift size={14} className="mr-1" />
-                      Bạn sẽ nhận được 100,000đ + voucher giảm giá 15%!
-                    </div>
-                  </div>
-                )}
-                
-                {/* Error state */}
-                {referralCode && !referralInfo && !isValidating && (
-                  <div className="mt-2 text-sm text-red-600">
-                    Mã giới thiệu không hợp lệ hoặc đã được sử dụng
-                  </div>
-                )}
                 
                 {/* Help text */}
                 <p className="text-sm text-gray-500 mt-2">
@@ -206,7 +156,7 @@ const UseReferralCodeModal = ({ isOpen, onClose, onSuccess }) => {
           <button 
             type="submit"
             onClick={handleSubmit}
-            disabled={!referralInfo || isSubmitting}
+            disabled={!referralCode || isSubmitting}
             className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-lg hover:from-emerald-700 hover:to-green-800 transition-all shadow-md font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {isSubmitting ? (

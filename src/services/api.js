@@ -1,5 +1,16 @@
 import axios from 'axios';
 
+// Get User Balance API
+export const getUserBalance = async () => {
+  try {
+    const response = await axios.get('/users/balance');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user balance:', error);
+    throw error;
+  }
+};
+
 // Voucher History API
 export const fetchVoucherHistory = async (page = 1, limit = 10) => {
   try {
@@ -71,7 +82,15 @@ export const useReferralCode = async (referralCode) => {
     return response.data;
   } catch (error) {
     console.error('Error using referral code:', error);
-    throw error;
+    // Throw the error with proper structure for the modal to handle
+    if (error.response?.data) {
+      throw error.response.data;
+    }
+    throw {
+      success: false,
+      message: 'Có lỗi xảy ra khi sử dụng mã giới thiệu',
+      error: error.message
+    };
   }
 };
 

@@ -2,16 +2,38 @@ import { useState, useContext, useEffect } from 'react';
 import { WalletIcon, ArrowUpIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../conext/AuthContext';
-import { getPaymentHistory } from '../../services/api';
+import { getPaymentHistory, getUserBalance } from '../../services/api';
 
 const Balance = () => {
   const [showBalance, setShowBalance] = useState(true);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [loadingTransactions, setLoadingTransactions] = useState(true);
+  const [balance, setBalance] = useState(0);
+  const [loadingBalance, setLoadingBalance] = useState(true);
   const { user, isLoading } = useContext(AuthContext);
   
-  // Use user balance or default to 0
-  const balance = user?.balance || 0;
+  // Fetch user balance from API
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        setLoadingBalance(true);
+        const response = await getUserBalance();
+        
+        if (response.success) {
+          setBalance(response.balance);
+        }
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+        // Keep default balance (0) on error
+      } finally {
+        setLoadingBalance(false);
+      }
+    };
+
+    if (user) {
+      fetchBalance();
+    }
+  }, [user]);
 
   // Fetch recent transactions from API
   useEffect(() => {
@@ -69,8 +91,8 @@ const Balance = () => {
     }).format(amount);
   };
 
-  // Show loading state
-  if (isLoading) {
+  // Show loading state while fetching balance or if auth is loading
+  if (isLoading || loadingBalance) {
     return (
       <div className="p-6 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>

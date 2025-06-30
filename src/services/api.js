@@ -40,3 +40,14 @@ export const getPaymentHistory = async (params = {}) => {
     throw error;
   }
 };
+
+// Admin Dashboard Stats API
+export const getAdminDashboardStats = async () => {
+  try {
+    const response = await axios.get('/admin/dashboard/stats');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching admin dashboard stats:', error);
+    throw error;
+  }
+};

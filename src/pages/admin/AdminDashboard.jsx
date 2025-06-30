@@ -20,13 +20,13 @@ import {
 import { 
   Users, 
   Briefcase, 
-  DollarSign, 
   TrendingUp, 
   UserPlus, 
   Calendar,
   Tag,
   Gift,
-  UserCheck
+  UserCheck,
+  Share2
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -38,7 +38,7 @@ const AdminDashboard = () => {
 
   // Format API data for charts
   const formatChartData = (apiData) => {
-    if (!apiData) return { dailyJobsData: [], newUsersData: [], jobsByCategoryData: [] };
+    if (!apiData) return { dailyJobsData: [], newUsersData: [], jobsByCategoryData: [], referralUsersData: [] };
 
     // Format daily jobs data - handle both 7 days and 30 days data
     const jobsData = apiData.charts.jobsCreatedIn30Days || apiData.charts.jobsCreatedIn7Days || [];
@@ -54,6 +54,13 @@ const AdminDashboard = () => {
       users: item.count
     }));
 
+    // Format referral users data
+    const referralData = apiData.charts.referralUsersIn30Days || [];
+    const referralUsersData = referralData.map(item => ({
+      date: `${item._id.day}/${item._id.month}`,
+      referrals: item.count
+    }));
+
     // Format jobs by category data
     const jobsByCategoryData = apiData.charts.jobsByCategory.map(item => ({
       name: item.categoryName,
@@ -61,7 +68,7 @@ const AdminDashboard = () => {
       color: item.categoryColor
     }));
 
-    return { dailyJobsData, newUsersData, jobsByCategoryData };
+    return { dailyJobsData, newUsersData, jobsByCategoryData, referralUsersData };
   };
 
   // Fetch dashboard stats
@@ -87,7 +94,7 @@ const AdminDashboard = () => {
   }, []);
 
   // Get formatted chart data
-  const { dailyJobsData, newUsersData, jobsByCategoryData } = formatChartData(statsData);
+  const { dailyJobsData, newUsersData, jobsByCategoryData, referralUsersData } = formatChartData(statsData);
 
   // Calculate completion rate (completed / total jobs)
   const completionRate = statsData?.jobs?.total > 0 
@@ -218,11 +225,11 @@ const AdminDashboard = () => {
                   color="text-teal-600"
                 />
                 <StatCard
-                  title="Doanh thu"
-                  value="Đang cập nhật"
-                  icon={DollarSign}
-                  color="text-yellow-600"
-                  subtitle="Sẽ được thêm sau"
+                  title="Người dùng qua giới thiệu"
+                  value={statsData.referral?.totalReferredUsers || 0}
+                  icon={Share2}
+                  color="text-orange-600"
+                  subtitle={`${statsData.referral?.referredUsersIn30Days || 0} trong 30 ngày`}
                 />
               </div>
 
@@ -263,6 +270,22 @@ const AdminDashboard = () => {
                         dot={{ fill: '#82ca9d', strokeWidth: 2, r: 4 }}
                       />
                     </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Biểu đồ người dùng qua giới thiệu */}
+                <div className="bg-white p-6 rounded-lg shadow">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    Người dùng qua giới thiệu (30 ngày qua)
+                  </h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={referralUsersData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="referrals" fill="#ff7300" />
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
@@ -385,21 +408,12 @@ const AdminDashboard = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
+              <div 
+                className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all duration-200 cursor-pointer border border-transparent hover:border-indigo-200"
+                onClick={() => navigate('/admin/referrals')}
+              >
                 <div className="flex items-center mb-3">
-                  <DollarSign className="h-6 w-6 text-yellow-600 mr-2" />
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Báo cáo tài chính
-                  </h3>
-                </div>
-                <p className="text-sm text-gray-600">
-                  Xem báo cáo doanh thu và thống kê tài chính
-                </p>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all duration-200 cursor-pointer border border-transparent hover:border-indigo-200">
-                <div className="flex items-center mb-3">
-                  <UserCheck className="h-6 w-6 text-indigo-600 mr-2" />
+                  <Share2 className="h-6 w-6 text-indigo-600 mr-2" />
                   <h3 className="text-lg font-medium text-gray-900">
                     Chương trình giới thiệu
                   </h3>

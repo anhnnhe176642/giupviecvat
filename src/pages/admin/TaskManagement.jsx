@@ -18,7 +18,7 @@ const TaskManagement = () => {
               </h3>
               <div className="mt-4">
                 <p className="text-sm text-gray-500">
-                  Chức năng quản lý công việc sẽ được phát triển tại đây.
+                  Chức năng quản lý công việc sẽ được phát triển tại đây. mà để chi
                 </p>
               </div>
             </div>

@@ -18,7 +18,7 @@ const UserManagement = () => {
               </h3>
               <div className="mt-4">
                 <p className="text-sm text-gray-500">
-                  Chức năng quản lý người dùng sẽ được phát triển tại đây.
+                  Chức năng quản lý người dùng sẽ được phát triển tại đây - hoặc là khôn bao giờ :)
                 </p>
               </div>
             </div>

@@ -25,6 +25,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import TaskManagement from "./pages/admin/TaskManagement";
 import CategoryManagement from "./pages/admin/CategoryManagement";
+import VoucherManagement from "./pages/admin/VoucherManagement";
 import AccountManagement from "./pages/AccountManagement";
 import Balance from "./pages/account/Balance";
 import Deposit from "./pages/account/Deposit";
@@ -87,6 +88,7 @@ function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="tasks" element={<TaskManagement />} />
           <Route path="categories" element={<CategoryManagement />} />
+          <Route path="vouchers" element={<VoucherManagement />} />
         </Route>
         
         <Route path="/unauthorized" element={<Unauthorized />} />

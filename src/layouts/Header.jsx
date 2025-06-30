@@ -54,7 +54,7 @@ function Header() {
             <Link to="/chat" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Tin nhắn</Link>
             
             <Link to="/refer-friends" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Mời bạn bè</Link>
-            <Link to="#" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Đánh giá</Link>
+            <Link to="/account" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Tài Khoản</Link>
             {user && (
               <Link to="/dashboard" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-200 border-b-2 border-transparent hover:border-green-600 py-1">Bảng điều khiển</Link>
             )}

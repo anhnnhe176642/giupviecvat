@@ -231,8 +231,19 @@ function BrowseTasks() {
         // Add the new task to the current tasks list
         setTasks(prevTasks => [response.data.task, ...prevTasks]);
         
-        // Show success message
-        toast("Công việc đã được tạo thành công!");
+        // Show success message with transaction details
+        const { transaction } = response.data;
+        let successMessage = "Công việc đã được tạo thành công!";
+        
+        if (transaction && transaction.voucher) {
+          successMessage += ` Đã áp dụng voucher ${transaction.voucher.name} giảm ${transaction.discountAmount.toLocaleString('vi-VN')} VNĐ.`;
+        }
+        
+        if (transaction) {
+          successMessage += ` Tổng thanh toán: ${transaction.finalAmount.toLocaleString('vi-VN')} VNĐ.`;
+        }
+        
+        toast.success(successMessage);
         
         // Refresh tasks list to ensure we have the latest data
         // This could be optimized to just add the new task to the state instead of refetching
@@ -260,11 +271,17 @@ function BrowseTasks() {
         }
       } else {
         // Show error message
-        toast("Lỗi: " + response.data.message);
+        toast.error(response.data.message || "Lỗi khi tạo công việc.");
       }
     } catch (error) {
       console.error("Error creating task:", error);
-      toast("Đã xảy ra lỗi khi tạo công việc. Vui lòng thử lại sau.");
+      
+      // Handle specific error messages from the API
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Đã xảy ra lỗi khi tạo công việc. Vui lòng thử lại sau.");
+      }
     }
     setIsCreateModalOpen(false);
   };

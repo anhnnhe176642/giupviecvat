@@ -17,8 +17,19 @@ function Home() {
       const response = await axios.post("/tasks", newTask);
       
       if (response.data.success) {
-        // Show success message
-        toast.success("Công việc đã được tạo thành công!");
+        // Show success message with transaction details
+        const { transaction } = response.data;
+        let successMessage = "Công việc đã được tạo thành công!";
+        
+        if (transaction && transaction.voucher) {
+          successMessage += ` Đã áp dụng voucher ${transaction.voucher.name} giảm ${transaction.discountAmount.toLocaleString('vi-VN')} VNĐ.`;
+        }
+        
+        if (transaction) {
+          successMessage += ` Tổng thanh toán: ${transaction.finalAmount.toLocaleString('vi-VN')} VNĐ.`;
+        }
+        
+        toast.success(successMessage);
         
         // Redirect to browse tasks page after successful creation
         navigate('/browse-tasks');
@@ -28,7 +39,13 @@ function Home() {
       }
     } catch (error) {
       console.error("Error creating task:", error);
-      toast.error("Đã xảy ra lỗi khi tạo công việc. Vui lòng thử lại sau.");
+      
+      // Handle specific error messages from the API
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Đã xảy ra lỗi khi tạo công việc. Vui lòng thử lại sau.");
+      }
     }
     setIsCreateModalOpen(false);
   };

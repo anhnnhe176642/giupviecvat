@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from 'react';
-import { X, Plus, Minus, Compass, Loader, Tag } from 'lucide-react';
+import { useState, useEffect, useContext, useCallback } from 'react';
+import { X, Plus, Minus, Compass, Loader, Tag, Ticket } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
@@ -40,21 +40,13 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
   // New state for posting fee
   const [postingFee, setPostingFee] = useState(0);
 
-  // Add discount code state
-  const [discountCode, setDiscountCode] = useState('');
-  const [isCheckingDiscount, setIsCheckingDiscount] = useState(false);
-  const [discount, setDiscount] = useState(null);
+  // Replace discount code state with voucher state
+  const [availableVouchers, setAvailableVouchers] = useState([]);
+  const [selectedVoucher, setSelectedVoucher] = useState(null);
+  const [isLoadingVouchers, setIsLoadingVouchers] = useState(false);
+  const [voucherError, setVoucherError] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
-
-  // Reset form when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      resetForm();
-    } else {
-      // Fetch categories when modal opens
-      fetchCategories();
-    }
-  }, [isOpen]);
+  const [showVoucherList, setShowVoucherList] = useState(false);
 
   // Fetch categories from API
   const fetchCategories = async () => {
@@ -78,6 +70,47 @@ const CreateTaskModal = ({ isOpen, onClose, onCreateTask }) => {
       setIsLoadingCategories(false);
     }
   };
+
+  // Fetch available vouchers from API
+  const fetchAvailableVouchers = useCallback(async () => {
+    try {
+      setIsLoadingVouchers(true);
+      setVoucherError(null);
+      
+      const response = await axios.get("/vouchers/available", {
+        params: { orderAmount: postingFee }
+      });
+      
+      if (response.data.vouchers) {
+        setAvailableVouchers(response.data.vouchers);
+      } else {
+        setVoucherError("Failed to load vouchers");
+      }
+    } catch (error) {
+      console.error("Error fetching vouchers:", error);
+      setVoucherError("Error loading vouchers. Please try again.");
+      setAvailableVouchers([]);
+    } finally {
+      setIsLoadingVouchers(false);
+    }
+  }, [postingFee]);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      resetForm();
+    } else {
+      // Fetch categories when modal opens
+      fetchCategories();
+    }
+  }, [isOpen]);
+
+  // Fetch available vouchers when posting fee changes
+  useEffect(() => {
+    if (postingFee > 0) {
+      fetchAvailableVouchers();
+    }
+  }, [postingFee, fetchAvailableVouchers]);
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -211,6 +244,7 @@ useEffect(() => {
         lat: markerPosition[0],
         lng: markerPosition[1],
         category: selectedCategory,
+        voucherCode: selectedVoucher ? selectedVoucher.code : undefined,
       };
       
       onCreateTask(newTask);
@@ -246,8 +280,9 @@ useEffect(() => {
     setMapStyle('stadiaBright');
     setSelectedCategory(''); // Reset selected category
     setPostingFee(0); // Reset posting fee
-    setDiscountCode(''); // Reset discount code
-    setDiscount(null); // Reset discount
+    setAvailableVouchers([]); // Reset available vouchers
+    setSelectedVoucher(null); // Reset selected voucher
+    setShowVoucherList(false); // Reset voucher list display
     setTotalPrice(0); // Reset total price
   };
 
@@ -281,47 +316,28 @@ useEffect(() => {
     }
   }, [selectedCategory, categories]);
 
-  // Calculate total price based on posting fee and discount
+  // Calculate total price based on posting fee and selected voucher
   useEffect(() => {
     let finalPrice = postingFee;
     
-    if (discount && discount.percentage) {
-      const discountAmount = postingFee * (discount.percentage / 100);
-      finalPrice = postingFee - discountAmount;
+    if (selectedVoucher && selectedVoucher.discountAmount) {
+      finalPrice = postingFee - selectedVoucher.discountAmount;
     }
     
-    setTotalPrice(finalPrice);
-  }, [postingFee, discount]);
+    setTotalPrice(Math.max(0, finalPrice));
+  }, [postingFee, selectedVoucher]);
 
-  // Function to check discount code
-  const checkDiscountCode = async () => {
-    if (!discountCode.trim()) return;
-    
-    setIsCheckingDiscount(true);
-    try {
-      // Placeholder for API call - implement actual API call in production
-      // const response = await axios.get(`/discounts/${discountCode}`);
-      
-      // Simulate API call for demo
-      setTimeout(() => {
-        // Placeholder discount logic
-        if (discountCode.toLowerCase() === 'giam10%') {
-          setDiscount({ code: discountCode, percentage: 10 });
-          toast.success('Đã áp dụng mã giảm giá 10%');
-        } else if (discountCode.toLowerCase() === 'giam15%') {
-          setDiscount({ code: discountCode, percentage: 15 });
-          toast.success('Đã áp dụng mã giảm giá 15%');
-        } else {
-          setDiscount(null);
-          toast.error('Mã giảm giá không hợp lệ');
-        }
-        setIsCheckingDiscount(false);
-      }, 1000);
-    } catch (error) {
-      console.error('Error checking discount code:', error);
-      toast.error('Có lỗi khi kiểm tra mã giảm giá');
-      setIsCheckingDiscount(false);
-    }
+  // Handle voucher selection
+  const handleVoucherSelect = (voucher) => {
+    setSelectedVoucher(voucher);
+    setShowVoucherList(false);
+    toast.success(`Đã áp dụng voucher: ${voucher.name}`);
+  };
+
+  // Remove selected voucher
+  const removeSelectedVoucher = () => {
+    setSelectedVoucher(null);
+    toast.success('Đã hủy voucher');
   };
 
   if (!isOpen) return null;
@@ -601,52 +617,103 @@ useEffect(() => {
                 </div>
               </div>
               
-              {/* Discount code - new field */}
+              {/* User Balance Display */}
               <div>
-                <label htmlFor="discountCode" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Mã giảm giá (nếu có)
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Số dư hiện tại
                 </label>
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-grow">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Tag size={16} className="text-gray-400" />
-                    </div>
-                    <input
-                      id="discountCode"
-                      type="text"
-                      value={discountCode}
-                      onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                      placeholder="Nhập mã giảm giá"
-                      className="w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm"
-                    />
+                <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Số dư khả dụng:</span>
+                    <span className="font-bold text-lg text-blue-700">
+                      {formatVND((user?.balance || 0).toString())} VNĐ
+                    </span>
                   </div>
+                  {user?.balance < totalPrice && totalPrice > 0 && (
+                    <p className="text-red-600 text-xs mt-1">
+                      Số dư không đủ để thực hiện giao dịch này
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Voucher Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <Ticket size={16} className="inline mr-1" />
+                  Voucher giảm giá
+                </label>
+                
+                {/* Selected voucher display */}
+                {selectedVoucher ? (
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <p className="font-medium text-emerald-800">{selectedVoucher.name}</p>
+                        <p className="text-sm text-emerald-600">{selectedVoucher.description}</p>
+                      </div>
+                      <button
+                        onClick={removeSelectedVoucher}
+                        className="text-emerald-600 hover:text-emerald-800 p-1"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <div className="text-sm text-emerald-700">
+                      Giảm: {formatVND(selectedVoucher.discountAmount.toString())} VNĐ
+                    </div>
+                  </div>
+                ) : (
                   <button
                     type="button"
-                    onClick={checkDiscountCode}
-                    disabled={isCheckingDiscount || !discountCode.trim()}
-                    className={`px-4 py-2.5 rounded-lg font-medium ${
-                      isCheckingDiscount || !discountCode.trim()
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-emerald-500 text-white hover:bg-emerald-600'
-                    } transition-all shadow-sm`}
+                    onClick={() => setShowVoucherList(!showVoucherList)}
+                    disabled={isLoadingVouchers || availableVouchers.length === 0}
+                    className={`w-full p-3 border rounded-lg text-left transition-all ${
+                      isLoadingVouchers || availableVouchers.length === 0
+                        ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200'
+                        : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-emerald-300'
+                    }`}
                   >
-                    {isCheckingDiscount ? (
-                      <Loader size={16} className="animate-spin" />
-                    ) : 'Áp dụng'}
+                    {isLoadingVouchers ? (
+                      <div className="flex items-center">
+                        <Loader size={16} className="animate-spin mr-2" />
+                        Đang tải voucher...
+                      </div>
+                    ) : availableVouchers.length === 0 ? (
+                      'Không có voucher khả dụng'
+                    ) : (
+                      `Chọn voucher (${availableVouchers.length} khả dụng)`
+                    )}
                   </button>
-                </div>
+                )}
                 
-                {/* Show discount info if applied */}
-                {discount && (
-                  <div className="mt-2 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-lg text-sm text-emerald-700 flex items-center">
-                    <span className="font-medium">Giảm giá: {discount.percentage}%</span>
-                    <button 
-                      className="ml-auto text-emerald-600 hover:text-emerald-800"
-                      onClick={() => setDiscount(null)}
-                    >
-                      <X size={14} />
-                    </button>
+                {/* Voucher list */}
+                {showVoucherList && availableVouchers.length > 0 && (
+                  <div className="mt-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg bg-white shadow-sm">
+                    {availableVouchers.map((voucher) => (
+                      <button
+                        key={voucher.id}
+                        onClick={() => handleVoucherSelect(voucher)}
+                        className="w-full p-3 text-left hover:bg-emerald-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-800">{voucher.name}</p>
+                            <p className="text-sm text-gray-600 mt-1">{voucher.description}</p>
+                            <div className="flex items-center mt-1 text-xs text-gray-500">
+                              <span>Giảm: {formatVND(voucher.discountAmount.toString())} VNĐ</span>
+                              <span className="mx-2">•</span>
+                              <span>HSD: {new Date(voucher.endDate).toLocaleDateString('vi-VN')}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
                   </div>
+                )}
+                
+                {voucherError && (
+                  <p className="text-red-500 text-xs mt-1">{voucherError}</p>
                 )}
               </div>
 
@@ -656,20 +723,30 @@ useEffect(() => {
                 <div className="p-4 bg-gradient-to-r from-emerald-50 to-gray-50 rounded-lg border border-gray-100 shadow-sm">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-gray-600">Giá đăng bài:</span>
-                    <span className="font-medium">{formatVND(postingFee+"")} VNĐ</span>
+                    <span className="font-medium">{formatVND(postingFee.toString())} VNĐ</span>
                   </div>
                   
-                  {discount && (
+                  {selectedVoucher && selectedVoucher.discountAmount > 0 && (
                     <div className="flex justify-between items-center mb-1 text-emerald-600">
-                      <span>Giảm giá ({discount.percentage}%):</span>
-                      <span>- {formatVND(Math.round(postingFee * discount.percentage / 100))} VNĐ</span>
+                      <span>Giảm giá ({selectedVoucher.name}):</span>
+                      <span>- {formatVND(selectedVoucher.discountAmount.toString())} VNĐ</span>
                     </div>
                   )}
                   
                   <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between items-center">
                     <span className="font-bold text-gray-700">Tổng cộng:</span>
-                    <span className="font-bold text-lg text-emerald-700">{formatVND(totalPrice)} VNĐ</span>
+                    <span className={`font-bold text-lg ${
+                      user?.balance >= totalPrice ? 'text-emerald-700' : 'text-red-600'
+                    }`}>
+                      {formatVND(totalPrice.toString())} VNĐ
+                    </span>
                   </div>
+                  
+                  {user?.balance < totalPrice && totalPrice > 0 && (
+                    <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+                      ⚠️ Số dư không đủ. Vui lòng nạp thêm {formatVND((totalPrice - (user?.balance || 0)).toString())} VNĐ
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -686,9 +763,14 @@ useEffect(() => {
           </button>
           <button 
             onClick={handleSubmit}
-            className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-lg hover:from-emerald-700 hover:to-green-800 transition-all shadow-md font-medium"
+            disabled={user?.balance < totalPrice && totalPrice > 0}
+            className={`px-6 py-2.5 rounded-lg transition-all shadow-md font-medium ${
+              user?.balance < totalPrice && totalPrice > 0
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                : 'bg-gradient-to-r from-emerald-600 to-green-700 text-white hover:from-emerald-700 hover:to-green-800'
+            }`}
           >
-            Tạo công việc
+            {user?.balance < totalPrice && totalPrice > 0 ? 'Số dư không đủ' : 'Tạo công việc'}
           </button>
         </div>
       </div>

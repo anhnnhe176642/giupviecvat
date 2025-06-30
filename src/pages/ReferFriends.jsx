@@ -1,12 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { FaLink, FaFacebookF, FaTwitter, FaEnvelope, FaGift, FaCopy, FaCheckCircle, FaUserPlus, FaCoins, FaPercent } from 'react-icons/fa';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { FaLink, FaFacebookF, FaTwitter, FaEnvelope, FaGift, FaCopy, FaCheckCircle, FaUserPlus, FaCoins, FaPercent, FaSpinner, FaUsers, FaHistory, FaEye, FaEyeSlash, FaPlus } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { AuthContext } from '../conext/AuthContext';
+import { generateReferralCode, getReferralInfo } from '../services/api';
+import UseReferralCodeModal from '../components/UseReferralCodeModal';
 
 function ReferFriends() {
+  const { user, isLoading: authLoading } = useContext(AuthContext);
   const [copied, setCopied] = useState(false);
-  const referralLink = "https://giupviecvat.vercel.app/ref/G54FNWE4"; // This would be dynamic based on user ID
+  const [referralData, setReferralData] = useState(null);
+  const [isReferralLoading, setIsReferralLoading] = useState(false);
   const [isVisible, setIsVisible] = useState({});
+  const [showReferralList, setShowReferralList] = useState(false);
+  const [showUseReferralModal, setShowUseReferralModal] = useState(false);
+  
+  const referralLink = referralData?.referralCode 
+    ? `${window.location.origin}/register?ref=${referralData.referralCode}`
+    : "Đang tạo link...";
   
   // Add scrollToShare function
   const scrollToShare = () => {
@@ -14,6 +25,71 @@ function ReferFriends() {
     if (shareSection) {
       shareSection.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  // Initialize referral data
+  const initializeReferralData = useCallback(async () => {
+    if (!user) {
+      return;
+    }
+
+    setIsReferralLoading(true);
+    try {
+      // Try to get existing referral info first
+      const response = await getReferralInfo();
+      if (response.success) {
+        // Check if user already has a referral code
+        if (response.data && response.data.referralCode) {
+          // User already has a referral code, use existing data
+          setReferralData(response.data);
+        } else {
+          // User doesn't have a referral code yet, generate one
+          try {
+            const generateResponse = await generateReferralCode();
+            if (generateResponse.success) {
+              // Fetch the complete referral info after generating code
+              const infoResponse = await getReferralInfo();
+              if (infoResponse.success) {
+                setReferralData(infoResponse.data);
+              }
+            }
+          } catch (generateError) {
+            console.error('Error generating referral code:', generateError);
+            toast.error('Không thể tạo mã giới thiệu. Vui lòng thử lại sau.');
+          }
+        }
+      }
+    } catch (error) {
+      // If getReferralInfo fails completely (user has no referral record), generate a new code
+      console.error('Error fetching referral info:', error);
+      try {
+        const generateResponse = await generateReferralCode();
+        if (generateResponse.success) {
+          // Fetch the complete referral info after generating code
+          const infoResponse = await getReferralInfo();
+          if (infoResponse.success) {
+            setReferralData(infoResponse.data);
+          }
+        }
+      } catch (generateError) {
+        console.error('Error generating referral code:', generateError);
+        toast.error('Không thể tạo mã giới thiệu. Vui lòng thử lại sau.');
+      }
+    } finally {
+      setIsReferralLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!authLoading) {
+      initializeReferralData();
+    }
+  }, [initializeReferralData, authLoading]);
+
+  // Handle successful referral code usage
+  const handleReferralSuccess = () => {
+    // Refresh referral data after successful use
+    initializeReferralData();
   };
   
   useEffect(() => {
@@ -107,6 +183,18 @@ function ReferFriends() {
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-hidden">
+      {/* Loading State */}
+      {(authLoading || isReferralLoading) && (
+        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-2xl shadow-xl flex items-center space-x-4">
+            <FaSpinner className="animate-spin text-green-600 text-2xl" />
+            <span className="text-lg font-medium">
+              {authLoading ? 'Đang xác thực...' : 'Đang tải thông tin giới thiệu...'}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section id="hero" className="relative bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700 py-24">
         {/* Animated decorative elements */}
@@ -195,17 +283,54 @@ function ReferFriends() {
               Mời bạn bè tham gia GIupViecVat và cả hai sẽ nhận được ưu đãi đặc biệt
             </motion.p>
             
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9, duration: 0.8 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={scrollToShare}
-              className="bg-white text-green-700 px-10 py-4 rounded-full hover:bg-yellow-100 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl"
-            >
-              Bắt đầu giới thiệu ngay
-            </motion.button>
+            {user ? (
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9, duration: 0.8 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={scrollToShare}
+                className="bg-white text-green-700 px-10 py-4 rounded-full hover:bg-yellow-100 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl"
+              >
+                Bắt đầu giới thiệu ngay
+              </motion.button>
+            ) : (
+              <div className="space-y-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9, duration: 0.8 }}
+                  className="bg-yellow-100 text-yellow-800 px-6 py-3 rounded-full inline-block font-medium mb-4"
+                >
+                  Đăng nhập để tham gia chương trình giới thiệu
+                </motion.div>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <motion.button
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.1, duration: 0.8 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => window.location.href = '/login'}
+                    className="bg-white text-green-700 px-8 py-4 rounded-full hover:bg-yellow-100 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl"
+                  >
+                    Đăng nhập
+                  </motion.button>
+                  <motion.button
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.2, duration: 0.8 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => window.location.href = '/register'}
+                    className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full hover:bg-white hover:text-green-700 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl"
+                  >
+                    Đăng ký ngay
+                  </motion.button>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
         
@@ -217,9 +342,10 @@ function ReferFriends() {
         </div>
       </section>
 
-      {/* Referral Link Section */}
-      <section id="share" className="py-20">
-        <div className="container mx-auto px-4">
+      {/* Referral Link Section - Only show if user is logged in */}
+      {user && (
+        <section id="share" className="py-20">
+          <div className="container mx-auto px-4">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             animate={isVisible.share ? { opacity: 1, y: 0 } : {}}
@@ -234,6 +360,16 @@ function ReferFriends() {
             <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-8">
               Chia sẻ link giới thiệu của bạn
             </h2>
+            
+            {/* Referral Code Display */}
+            {referralData?.referralCode && (
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl mb-6 text-center">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Mã giới thiệu của bạn</h3>
+                <div className="text-3xl font-bold text-green-600 tracking-wider">
+                  {referralData.referralCode}
+                </div>
+              </div>
+            )}
             
             <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-10">
               <motion.div 
@@ -262,7 +398,7 @@ function ReferFriends() {
             
             <div className="text-center">
               <p className="text-gray-600 mb-6 text-lg">Hoặc chia sẻ qua mạng xã hội:</p>
-              <div className="flex justify-center space-x-6">
+              <div className="flex justify-center space-x-6 mb-8">
                 <motion.button 
                   onClick={() => shareToSocial('Facebook')} 
                   whileHover={{ scale: 1.1, y: -5 }}
@@ -288,10 +424,125 @@ function ReferFriends() {
                   <FaEnvelope size={24} />
                 </motion.button>
               </div>
+              
+              {/* Use Referral Code Button */}
+              {user && !referralData?.hasReceivedReferralBonus && (
+                <div className="border-t pt-6">
+                  <p className="text-gray-600 mb-4">Bạn có mã giới thiệu từ bạn bè?</p>
+                  <motion.button
+                    onClick={() => setShowUseReferralModal(true)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-4 rounded-full hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-bold flex items-center mx-auto shadow-lg"
+                  >
+                    <FaPlus className="mr-2" />
+                    Sử dụng mã giới thiệu
+                  </motion.button>
+                </div>
+              )}
             </div>
           </motion.div>
+
+          {/* Referral Statistics */}
+          {referralData && (
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={isVisible.share ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="max-w-4xl mx-auto"
+            >
+              <div className="grid md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-green-500">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 uppercase tracking-wide font-medium">Tổng số lời mời</p>
+                      <p className="text-3xl font-bold text-green-600">{referralData.referralCount || 0}</p>
+                    </div>
+                    <FaUsers className="text-green-500 text-2xl" />
+                  </div>
+                </div>
+                
+                <div className="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-yellow-500">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 uppercase tracking-wide font-medium">Thưởng đã nhận</p>
+                      <p className="text-3xl font-bold text-yellow-600">
+                        {(referralData.totalBonusReceived || 0).toLocaleString('vi-VN')}đ
+                      </p>
+                    </div>
+                    <FaCoins className="text-yellow-500 text-2xl" />
+                  </div>
+                </div>
+                
+                <div className="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-blue-500">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 uppercase tracking-wide font-medium">Trạng thái</p>
+                      <p className="text-lg font-semibold text-blue-600">
+                        {referralData.hasReceivedReferralBonus ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
+                      </p>
+                    </div>
+                    <FaGift className="text-blue-500 text-2xl" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Referral History */}
+              {referralData.referrals && referralData.referrals.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-gray-800 flex items-center">
+                      <FaHistory className="mr-2 text-green-600" />
+                      Lịch sử giới thiệu
+                    </h3>
+                    <button
+                      onClick={() => setShowReferralList(!showReferralList)}
+                      className="flex items-center text-green-600 hover:text-green-700 font-medium"
+                    >
+                      {showReferralList ? <FaEyeSlash className="mr-1" /> : <FaEye className="mr-1" />}
+                      {showReferralList ? 'Ẩn' : 'Hiển thị'}
+                    </button>
+                  </div>
+                  
+                  {showReferralList && (
+                    <div className="space-y-4">
+                      {referralData.referrals.map((referral, index) => (
+                        <div key={referral.id || index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div className="flex items-center">
+                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                              <FaUserPlus className="text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-800">
+                                {referral.referredUser?.name || 'Người dùng ẩn danh'}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {new Date(referral.createdAt).toLocaleDateString('vi-VN')}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              referral.status === 'completed' 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {referral.status === 'completed' ? 'Hoàn thành' : 'Đang chờ'}
+                            </span>
+                            {referral.bonusGiven && (
+                              <p className="text-sm text-green-600 mt-1">+50,000đ</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          )}
         </div>
-      </section>
+      </section>)}
 
       {/* Rewards Section */}
       <section id="rewards" className="py-20 bg-gradient-to-b from-white to-green-50">
@@ -670,6 +921,13 @@ function ReferFriends() {
           </motion.div>
         </div>
       </section>
+      
+      {/* Use Referral Code Modal */}
+      <UseReferralCodeModal
+        isOpen={showUseReferralModal}
+        onClose={() => setShowUseReferralModal(false)}
+        onSuccess={handleReferralSuccess}
+      />
     </div>
   );
 }

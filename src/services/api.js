@@ -51,3 +51,46 @@ export const getAdminDashboardStats = async () => {
     throw error;
   }
 };
+
+// Referral API Functions
+export const generateReferralCode = async () => {
+  try {
+    const response = await axios.post('/referrals/generate-code');
+    return response.data;
+  } catch (error) {
+    console.error('Error generating referral code:', error);
+    throw error;
+  }
+};
+
+export const useReferralCode = async (referralCode) => {
+  try {
+    const response = await axios.post('/referrals/use-code', {
+      referralCode
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error using referral code:', error);
+    throw error;
+  }
+};
+
+export const getReferralInfo = async () => {
+  try {
+    const response = await axios.get('/referrals/info');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching referral info:', error);
+    throw error;
+  }
+};
+
+export const validateReferralCode = async (referralCode) => {
+  try {
+    const response = await axios.get(`/referrals/validate/${referralCode}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error validating referral code:', error);
+    throw error;
+  }
+};

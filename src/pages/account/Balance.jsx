@@ -55,6 +55,7 @@ const Balance = () => {
       'job_refund': 'refund',
       'voucher_usage': 'refund',
       'welcome_bonus': 'deposit',
+      "referral_bonus": 'deposit',
       'admin_adjustment': 'deposit',
       'withdrawal': 'payment'
     };
